@@ -28,6 +28,12 @@ input {
   border: 1px solid #fff;
   color: #fff;
 }
+input:focus{
+  outline: none;
+}
+input:focus-visible{
+  outline: none;
+}
 @keyframes rotate {
   from {
       transform: rotate(0deg);
