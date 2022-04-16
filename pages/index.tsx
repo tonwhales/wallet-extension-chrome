@@ -182,7 +182,7 @@ const WalletComponent = React.memo(() => {
     React.useEffect(() => {
         fetchBalance(friendly)
             .then((v) => {
-                setBalance(`${v}`)
+                setBalance(`${v}💎`)
             })
     }, [])
 
