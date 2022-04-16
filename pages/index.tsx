@@ -16,8 +16,11 @@ type FormData = { address: string, amount: string };
 
 const CreateSessionComponent = React.memo(() => {
     let auth = useAuth();
+    let temp = { address: '', endPoint: '', appPublicKey: '' }
     React.useEffect(() => {
         let exited = false;
+        chrome.storage.sync.get('whales-profile', (v) => { console.log(v['whales-profile']); temp = v['whales-profile'] });
+        console.log(temp, 'temp');
         backoff(async () => {
             if (exited) {
                 return;
@@ -33,6 +36,12 @@ const CreateSessionComponent = React.memo(() => {
             });
             if (!session.data.ok) {
                 throw Error('Unable to create state');
+            }
+            if (temp) {
+                chrome.storage.sync.set({ 'whales-state-key': seed.toString('base64') }, () => console.log('extension logged', seed.toString('base64')));
+                Cookies.set('whales-state', key, { expires: 356 });
+                auth.handler({ session: key, wallet: { address: temp.address, endpoint: temp.endPoint, appPublicKey: temp.appPublicKey } });
+                return
             }
             if (exited) {
                 return;
@@ -51,7 +60,7 @@ const CreateSessionComponent = React.memo(() => {
 
 
     return (
-        <div style={{ display: 'flex', alignSelf: 'center', justifyContent: 'center', backgroundColor: '#222225', width:'300px', height:'60px', padding:'10px 0' }}>
+        <div style={{ display: 'flex', alignSelf: 'center', justifyContent: 'center', backgroundColor: '#222225', width: '300px', height: '60px', padding: '10px 0' }}>
             <ActivityIndicator />
         </div>
     );
@@ -77,6 +86,13 @@ const ConnectComponent = React.memo(() => {
                 // Refresh session
                 if (state.state === 'ready') {
 
+                    chrome.storage.sync.set({
+                        'whales-profile': {
+                            address: state.wallet!.address,
+                            endpoint: state.wallet!.endpoint,
+                            appPublicKey: state.wallet!.appPublicKey
+                        }
+                    }, () => console.log('extension logged'));
                     Cookies.set('whales-state', auth.state!.session, { expires: 356 });
                     auth.handler({
                         session: auth.state!.session,
@@ -164,6 +180,7 @@ const WalletComponent = React.memo(() => {
                 <button
                     onClick={() => {
                         // Reset session
+                        chrome.storage.sync.remove(['whales-state-key','whales-profile'],()=>{console.log('Disconnected');});
                         Cookies.remove('whales-state');
                         auth.handler(null);
                     }}>
@@ -231,7 +248,7 @@ const WalletComponent = React.memo(() => {
                         pkg.bits.writeBuffer(keypair.publicKey);
                         pkg.refs.push(job);
                         let s = pkg.toBoc({ idx: false }).toString('base64');
-                        console.log(s,'s');
+                        console.log(s, 's');
                         console.log(seed, 'seed');
 
                         //             let dest = ds.readAddress();
