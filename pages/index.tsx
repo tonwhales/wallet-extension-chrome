@@ -1,72 +1,284 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
+import * as React from 'react';
+import { NextPage } from "next";
+import { backoff, delay } from '@openland/patterns';
+import axios from 'axios';
+import { getSecureRandomBytes, keyPairFromSeed, sign } from 'ton-crypto'
+import Cookies from 'js-cookie';
+import QRCode from 'qrcode.react';
+import { Address, Cell, toNano } from 'ton';
+import { useAuth } from '../components/AuthProvider';
+import { ActivityIndicator } from '../components/ActivityIndicator';
+import { getConnectState } from '../api/getConnectState';
+import { toUrlSafe } from '../utils/toUrlSafe';
+import { IS_TESTNET } from '../api/client';
+
+type FormData = { address: string, amount: string };
+
+const CreateSessionComponent = React.memo(() => {
+    let auth = useAuth();
+    React.useEffect(() => {
+        let exited = false;
+        backoff(async () => {
+            if (exited) {
+                return;
+            }
+            let seed = await getSecureRandomBytes(32);
+            let keyPair = keyPairFromSeed(seed);
+            let key = toUrlSafe(keyPair.publicKey.toString('base64'));
+            let session = await axios.post('https://connect.tonhubapi.com/connect/init', {
+                key,
+                testnet: IS_TESTNET,
+                name: IS_TESTNET ? 'TEST Ton Whales' : 'Ton Whales',
+                url: IS_TESTNET ? 'https://test.tonwhales.com' : 'https://tonwhales.com'
+            });
+            if (!session.data.ok) {
+                throw Error('Unable to create state');
+            }
+            if (exited) {
+                return;
+            }
+
+            // Persist session
+            // localStorage.setItem('whales-state-key', seed.toString('base64'));
+            chrome.storage.sync.set({ 'whales-state-key': seed.toString('base64') }, () => console.log('extension logged', seed.toString('base64')));
+            Cookies.set('whales-state', key, { expires: 356 });
+            auth.handler({ session: key, wallet: null });
+        });
+        return () => {
+            exited = true;
+        }
+    }, []);
+
+
+    return (
+        <div style={{ display: 'flex', alignSelf: 'center', justifyContent: 'center', backgroundColor: '#222225', width:'300px', height:'60px', padding:'10px 0' }}>
+            <ActivityIndicator />
+        </div>
+    );
+});
+
+const ConnectComponent = React.memo(() => {
+    let auth = useAuth();
+    const link = (IS_TESTNET ? 'ton-test://connect/' : 'ton://connect/') + auth.state!.session + '?endpoint=connect.tonhubapi.com';
+
+    React.useEffect(() => {
+        let exited = false;
+
+        backoff(async () => {
+            if (exited) {
+                return;
+            }
+            while (!exited) {
+                let state = await getConnectState(auth.state!.session);
+                if (exited) {
+                    return;
+                }
+
+                // Refresh session
+                if (state.state === 'ready') {
+
+                    Cookies.set('whales-state', auth.state!.session, { expires: 356 });
+                    auth.handler({
+                        session: auth.state!.session,
+                        wallet: {
+                            address: state.wallet!.address,
+                            endpoint: state.wallet!.endpoint,
+                            appPublicKey: state.wallet!.appPublicKey
+                        }
+                    });
+                    return;
+                }
+
+                // Retry in 3 seconds
+                await delay(3000);
+            }
+        });
+
+        return () => {
+            exited = true;
+        }
+    }, []);
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', alignSelf: 'center', justifyContent: 'center', alignItems: 'center', backgroundColor: '#222225', padding: '15px', color: '#fff', width: '300px' }}>
+            <span style={{ fontSize: '15px' }}>Awaiting connection...</span>
+            {/* <ActivityIndicator /> */}
+            <div style={{ marginTop: 16 }}>
+                <span style={{ fontSize: '15px' }}>Scan this QR Code with {IS_TESTNET ? 'Ton Development Wallet' : 'Tonhub'}</span>
+            </div>
+            <div style={{ marginTop: 16 }}>
+                <QRCode
+                    size={256}
+                    value={link}
+                    renderAs="svg"
+                    bgColor='#222225'
+                    fgColor='#fff'
+                />
+            </div>
+        </div>
+    );
+});
+
+const WalletComponent = React.memo(() => {
+    let auth = useAuth();
+    let address = Address.parse(auth.state!.wallet!.address);
+    let friendly = address.toFriendly()
+    let endpoint = auth.state!.wallet!.endpoint;
+    let cuttedFriendly = friendly.slice(0, 6) + '...' + friendly.slice(friendly.length - 6);
+    let seed = ''
+    chrome.storage.sync.get('whales-state-key', (v) => { console.log(v['whales-state-key']); seed = v['whales-state-key'] });
+
+    const [form, setForm] = React.useState<FormData>({ address: '', amount: '' })
+
+    const handleFieldChange = React.useCallback((field: keyof FormData) => {
+        return (event: React.ChangeEvent<HTMLInputElement>) => {
+            setForm((prevValue) => {
+                const newValue = { ...prevValue, ...{ [field]: event.target.value } };
+                return newValue;
+            });
+        }
+    }, [setForm]);
+
+    return (
+        <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignSelf: 'center',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: '#222225',
+        }}>
+            <div style={{
+                display: 'flex',
+                borderBottom: '1px solid #fff',
+                padding: '15px',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                width: '350px',
+                color: '#fff'
+            }}>
+                <div style={{ display: 'flex' }}>
+                    <span style={{ width: '100px' }}>Your wallet:</span>
+                    <span>{cuttedFriendly}</span>
+                </div>
+                <button
+                    onClick={() => {
+                        // Reset session
+                        Cookies.remove('whales-state');
+                        auth.handler(null);
+                    }}>
+                    Disconnect
+                </button>
+            </div>
+            <div style={{
+                width: '350px',
+                padding: '15px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                gap: '15px'
+            }}>
+                <h1>Create transaction</h1>
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '5px',
+                    color: '#fff'
+                }}>
+                    <div>Amount:</div>
+                    <input type="text" value={form.amount} placeholder="Pass amount of TON" onChange={handleFieldChange('amount')} />
+                </div>
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '5px',
+                    color: '#fff'
+                }}>
+                    <div>To wallet:</div>
+                    <input type="text" placeholder="Pass the wallet" value={form.address} onChange={handleFieldChange('address')} />
+                </div>
+
+                <button
+                    onClick={() => {
+                        let expires = Math.floor(Date.now() / 1000) + 5 * 60;
+                        let job = new Cell();
+                        job.bits.writeBuffer(Buffer.from(auth.state!.wallet!.appPublicKey, 'base64'));
+                        job.bits.writeUint(expires, 32);
+                        job.bits.writeCoins(0);
+
+                        let jobD = new Cell();
+                        job.refs.push(jobD);
+                        jobD.bits.writeAddress(Address.parse('kQBs7t3uDYae2Ap4686Bl4zGaPKvpbauBnZO_WSop1whaLEs'));
+                        jobD.bits.writeCoins(toNano(100));
+                        jobD.bits.writeBit(false); // No hint
+
+                        let comment = new Cell();
+                        comment.bits.writeBuffer(Buffer.from('Sample transaction'));
+                        jobD.refs.push(comment);
+
+                        let payload = new Cell();
+                        jobD.refs.push(payload);
+
+                        // Sign
+                        let hash = job.hash();
+                        // let seed = localStorage.getItem('whales-state-key')!;
+                        // let seed=''
+                        let keypair = keyPairFromSeed(Buffer.from(seed, 'base64'));
+                        let signature = sign(hash, keypair.secretKey);
+
+                        let pkg = new Cell();
+                        pkg.bits.writeBuffer(signature);
+                        pkg.bits.writeBuffer(keypair.publicKey);
+                        pkg.refs.push(job);
+                        let s = pkg.toBoc({ idx: false }).toString('base64');
+                        console.log(s,'s');
+                        console.log(seed, 'seed');
+
+                        //             let dest = ds.readAddress();
+                        // if (!dest) {
+                        //     return null;
+                        // }
+
+                        // // Amount
+                        // let amount = ds.readCoins();
+
+                        // // Text
+                        // let text: string = parseString(ds.readRef());
+
+                        // // Payload
+                        // let payload: Cell = ds.readCell();
+
+                        // // Payload hint
+                        // let payloadHint: string | null = null;
+                        // if (ds.readBit()) {
+                        //     payloadHint = parseString(ds.readRef());
+                        // }
+
+                        //                 let key = sc.readBuffer(32);
+                        // let expires = sc.readUintNumber(32) * 1000;
+                        // let kind = sc.readCoins().toNumber();
+                        backoff(async () => {
+                            await axios.post(endpoint, {
+                                job: s
+                            });
+                        });
+                    }}
+                >Send
+                </button>
+            </div>
+        </div>
+    );
+});
 
 const Home: NextPage = () => {
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <meta name="description" content="Generated by create next app" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.tsx</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
-    </div>
-  )
+    let auth = useAuth();
+    return (
+        <>
+            {!auth.state && (<CreateSessionComponent />)}
+            {auth.state && !auth.state.wallet && (<ConnectComponent />)}
+            {auth.state && !!auth.state.wallet && (<WalletComponent />)}
+        </>
+    );
 }
 
 export default Home
