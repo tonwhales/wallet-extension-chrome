@@ -16,10 +16,14 @@ type FormData = { address: string, amount: string };
 
 const CreateSessionComponent = React.memo(() => {
     let auth = useAuth();
-    let temp = { address: '', endPoint: '', appPublicKey: '' }
+    let temp: {
+        address: string,
+        endPoint: string,
+        appPublicKey: string
+    } | null = null
     React.useEffect(() => {
         let exited = false;
-        chrome.storage.sync.get('whales-profile', (v) => { console.log(v['whales-profile']); temp = v['whales-profile'] });
+        chrome.storage.sync.get('whales-profile', (v) => { console.log(v['whales-profile'], 'logged from storage'); temp = v['whales-profile'] });
         console.log(temp, 'temp');
         backoff(async () => {
             if (exited) {
@@ -136,12 +140,30 @@ const ConnectComponent = React.memo(() => {
 });
 
 const WalletComponent = React.memo(() => {
+
+    async function fetchBalance(url?: string): Promise<number> {
+        if (url && url.length > 0) {
+            try {
+                let response = await fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${url}`, { headers: { 'X-API-Key': '4ec5fe67a679d83f732963bc164539bb09b623ffecbef2aa14817540d56974b5' } });
+                let data: any = await response.json();
+
+                if (data !== undefined && data.result !== undefined) {
+                    return data.result
+                }
+            } catch (e) {
+            }
+            return await fetchBalance(url)
+        }
+        return 0
+    }
     let auth = useAuth();
     let address = Address.parse(auth.state!.wallet!.address);
     let friendly = address.toFriendly()
     let endpoint = auth.state!.wallet!.endpoint;
     let cuttedFriendly = friendly.slice(0, 6) + '...' + friendly.slice(friendly.length - 6);
     let seed = ''
+    console.log(auth.state!.wallet!.endpoint, 'QQQQQQQQQ');
+
     chrome.storage.sync.get('whales-state-key', (v) => { console.log(v['whales-state-key']); seed = v['whales-state-key'] });
 
     const [form, setForm] = React.useState<FormData>({ address: '', amount: '' })
@@ -154,6 +176,15 @@ const WalletComponent = React.memo(() => {
             });
         }
     }, [setForm]);
+
+    const [balance, setBalance] = React.useState<string | null>(null)
+
+    React.useEffect(() => {
+        fetchBalance(friendly)
+            .then((v) => {
+                setBalance(`${v}`)
+            })
+    }, [])
 
     return (
         <div style={{
@@ -172,15 +203,24 @@ const WalletComponent = React.memo(() => {
                 alignItems: 'center',
                 width: '350px',
                 color: '#fff'
-            }}>
-                <div style={{ display: 'flex' }}>
-                    <span style={{ width: '100px' }}>Your wallet:</span>
-                    <span>{cuttedFriendly}</span>
+            }}><div style={{
+                display: 'flex',
+                flexDirection:'column',
+                gap:'12px'
+            }} >
+                    <div style={{ display: 'flex' }}>
+                        <span style={{ width: '100px' }}>Your wallet:</span>
+                        <span>{cuttedFriendly}</span>
+                    </div>
+                    <div style={{ display: 'flex' }}>
+                        <span style={{ width: '100px' }}>Balance:</span>
+                        <span>{balance ? balance : '...'}</span>
+                    </div>
                 </div>
                 <button
                     onClick={() => {
                         // Reset session
-                        chrome.storage.sync.remove(['whales-state-key','whales-profile'],()=>{console.log('Disconnected');});
+                        chrome.storage.sync.remove(['whales-state-key', 'whales-profile'], () => { console.log('Disconnected'); });
                         Cookies.remove('whales-state');
                         auth.handler(null);
                     }}>
@@ -275,7 +315,7 @@ const WalletComponent = React.memo(() => {
                         // let expires = sc.readUintNumber(32) * 1000;
                         // let kind = sc.readCoins().toNumber();
                         backoff(async () => {
-                            await axios.post(endpoint, {
+                            await axios.post('https://connect.tonhubapi.com/connect/command', {
                                 job: s
                             });
                         });
