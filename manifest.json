@@ -1,0 +1,13 @@
+{
+	"name": "TonWhales extension",
+	"description": "TonWhales extension with TonHu connection",
+	"version": "0.0.1",
+	"manifest_version": 3,
+	"action": {
+	  "default_title": "TonWhales extension",
+	  "default_popup": "index.html"
+	},
+	"permissions":[
+		"storage"
+	]
+}
