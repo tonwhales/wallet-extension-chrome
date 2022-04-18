@@ -1,6 +1,6 @@
 {
 	"name": "TonWhales extension",
-	"description": "TonWhales extension with TonHu connection",
+	"description": "TonWhales extension with TonHub connection",
 	"version": "0.0.1",
 	"manifest_version": 3,
 	"action": {

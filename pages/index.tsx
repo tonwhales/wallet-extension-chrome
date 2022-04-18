@@ -11,6 +11,7 @@ import { ActivityIndicator } from '../components/ActivityIndicator';
 import { getConnectState } from '../api/getConnectState';
 import { toUrlSafe } from '../utils/toUrlSafe';
 import { IS_TESTNET } from '../api/client';
+import { ValueComponent } from '../components/ValueComponent';
 
 type FormData = { address: string, amount: string };
 
@@ -182,7 +183,7 @@ const WalletComponent = React.memo(() => {
     React.useEffect(() => {
         fetchBalance(friendly)
             .then((v) => {
-                setBalance(`${v}💎`)
+                setBalance(`${v}`)
             })
     }, [])
 
@@ -212,12 +213,15 @@ const WalletComponent = React.memo(() => {
                         <span style={{ width: '100px' }}>Your wallet:</span>
                         <span>{cuttedFriendly}</span>
                     </div>
-                    <div style={{ display: 'flex' }}>
+                    <div style={{ display: 'flex', alignItems:'center' }}>
                         <span style={{ width: '100px' }}>Balance:</span>
-                        <span>{balance ? balance : '...'}</span>
+                        <span>{balance ? <ValueComponent value={balance}/> : '...'}</span>
                     </div>
                 </div>
                 <button
+                    // style={{
+                    //     backgroundColor: 1 < 2 ? '#F1A03A' : ''
+                    // }}
                     onClick={() => {
                         // Reset session
                         chrome.storage.sync.remove(['whales-state-key', 'whales-profile'], () => { console.log('Disconnected'); });
@@ -256,6 +260,9 @@ const WalletComponent = React.memo(() => {
                 </div>
 
                 <button
+                    // style={{
+                    //     backgroundColor: 1 < 2 ? '#F1A03A' : ''
+                    // }}
                     onClick={() => {
                         let expires = Math.floor(Date.now() / 1000) + 5 * 60;
                         let job = new Cell();
@@ -266,7 +273,7 @@ const WalletComponent = React.memo(() => {
                         let jobD = new Cell();
                         job.refs.push(jobD);
                         jobD.bits.writeAddress(Address.parse('kQBs7t3uDYae2Ap4686Bl4zGaPKvpbauBnZO_WSop1whaLEs'));
-                        jobD.bits.writeCoins(toNano(100));
+                        jobD.bits.writeCoins(toNano(1));
                         jobD.bits.writeBit(false); // No hint
 
                         let comment = new Cell();
