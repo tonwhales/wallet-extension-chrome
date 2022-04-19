@@ -1,18 +1,5 @@
 import * as React from 'react';
 import { NextPage } from "next";
-// import { backoff, delay } from '@openland/patterns';
-// import axios from 'axios';
-// import { getSecureRandomBytes, keyPairFromSeed, sign } from 'ton-crypto'
-// import Cookies from 'js-cookie';
-// import QRCode from 'qrcode.react';
-// import { Address, Cell, toNano } from 'ton';
-// import { useAuth } from '../components/AuthProvider';
-// import { ActivityIndicator } from '../components/ActivityIndicator';
-// import { getConnectState } from '../api/getConnectState';
-// import { toUrlSafe } from '../utils/toUrlSafe';
-// import { IS_TESTNET } from '../api/client';
-// import { ValueComponent } from '../components/ValueComponent';
-// import { App } from '../app/App';
 import { Boot } from '../app/Boot';
 
 // type FormData = { address: string, amount: string };

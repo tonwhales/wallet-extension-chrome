@@ -17,3 +17,4 @@ sed -i '' -e "s/\\/_next/\\.\\/next/g" build/export/index.html
 mkdir -p build/chrome-testnet
 rsync -va build/export/ ./build/chrome-testnet
 cp manifest.json build/chrome-testnet/
+cp manifest.json build/export/
