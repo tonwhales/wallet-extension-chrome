@@ -11,7 +11,7 @@ export function useBalance(address: string) {
         backoff(async () => {
             while (!exited) {
                 let balance = await tonClient.getBalance(Address.parse(address));
-                setPrice(fromNano(balance));
+                setPrice(balance.toString(10));
                 await delay(5000);
             }
         });

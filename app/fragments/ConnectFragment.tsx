@@ -82,7 +82,7 @@ const AwaitConnectionComponent = React.memo(() => {
 
     return (
         <View style={{ flexGrow: 1, flexBasis: 0, justifyContent: 'center', alignItems: 'center', alignSelf: 'stretch' }}>
-            <Text style={{ color: 'white', marginVertical: 8, fontSize: 18, marginHorizontal: 16, textAlign: 'center' }}>Connect Tonhub</Text>
+            <Text style={{ color: 'white', marginVertical: 8, fontSize: 18, marginHorizontal: 16, textAlign: 'center' }}>{IS_TESTNET ? 'Connect Ton Dev Wallet' : 'Connect Tonhub'}</Text>
             <Text style={{ color: 'white', marginVertical: 8, fontSize: 16, marginHorizontal: 16, textAlign: 'center' }}>Scan QR code to begin</Text>
             <QRCode
                 size={256}

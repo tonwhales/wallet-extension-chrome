@@ -5,6 +5,7 @@ import { useBalance } from '../model/useBalance';
 import { useDetectLogout } from '../model/useDetectLogout';
 import { Avatar } from './components/Avatar';
 import { SimpleButton } from './components/SimpleButton';
+import { ValueComponent } from './components/ValueComponent';
 
 export const AppFragment = React.memo(() => {
     useDetectLogout();
@@ -16,16 +17,21 @@ export const AppFragment = React.memo(() => {
         (async () => {
             await writeAuthState(null);
             authState.update(null);
-        });
+        })();
     }, []);
 
     return (
         <View style={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ marginTop: 24, fontSize: 18, color: 'white', alignSelf: 'center', opacity: 0.6 }}>Tonhub for Web</Text>
             <View style={{ flexGrow: 1 }} />
             <View style={{ marginHorizontal: 32 }}>
                 <View style={{ alignSelf: 'center', marginBottom: 24 }}>
                     <Avatar id={wallet.address} size={96} />
                 </View>
+                <Text style={{ height: 24, color: 'white', fontSize: 18, marginVertical: 8, alignSelf: 'center' }}>
+                    {balance && (<ValueComponent value={balance} />)}
+                    {!balance && <Text>...</Text>}
+                </Text>
                 <Text style={{ color: 'white', fontSize: 16, fontFamily: 'monospace' }}>{wallet.address.slice(0, 24)}</Text>
                 <Text style={{ color: 'white', fontSize: 16, fontFamily: 'monospace' }}>{wallet.address.slice(24)}</Text>
                 <View style={{ alignSelf: 'center', marginTop: 64 }}>
@@ -33,6 +39,6 @@ export const AppFragment = React.memo(() => {
                 </View>
             </View>
             <View style={{ flexGrow: 1 }} />
-        </View>
+        </View >
     );
 });
