@@ -1,41 +1,20 @@
 import * as React from 'react';
-import { delay } from 'teslabot';
-import { getSessionState } from '../api/getSessionState';
-import { useAuthState, writeAuthState } from '../model/AuthState';
-import { backoff } from '../utils/time';
+import { Text, View } from 'react-native';
+import { useAuthState } from '../model/AuthState';
+import { useDetectLogout } from '../model/useDetectLogout';
 
 export const AppFragment = React.memo(() => {
-    const state = useAuthState();
-    const session = state.state!.session;
-    React.useEffect(() => {
-        let exited = false;
+    useDetectLogout();
+    const authState = useAuthState();
+    let sessionState = authState.state!;
+    let wallet = sessionState.reference!;
 
-        backoff(async () => {
-            if (exited) {
-                return;
-            }
-            while (!exited) {
-                let fetchedState = await getSessionState(session);
-                if (exited) {
-                    return;
-                }
-
-                // Session lost: reset flow
-                if (fetchedState.state !== 'ready') {
-                    await writeAuthState(null);
-                    state.update(null);
-                    return
-                }
-
-                // Retry in 3 seconds
-                await delay(15000);
-            }
-        });
-
-        return () => {
-            exited = true;
-        }
-    }, []);
-
-    return null;
+    return (
+        <View style={{ flexGrow: 1, alignItems: 'stretch', justifyContent: 'center' }}>
+            <View style={{ marginHorizontal: 32 }}>
+                <Text style={{ color: 'white', fontSize: 16 }}>{wallet.address.slice(0, 24)}</Text>
+                <Text style={{ color: 'white', fontSize: 16 }}>{wallet.address.slice(24)}</Text>
+            </View>
+        </View>
+    );
 });

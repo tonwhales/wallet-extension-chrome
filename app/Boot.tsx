@@ -11,7 +11,9 @@ export const Boot = React.memo((props: { children?: any }) => {
     const [authState, setAuthState] = React.useState<undefined | null | AuthState>(undefined);
     React.useEffect(() => {
         backoff(async () => {
+            console.log('Loading auth state');
             let state = await readAuthState();
+            console.log('Loading auth state: ' + !!state);
             setAuthState(state);
         });
     }, []);

@@ -18,6 +18,7 @@ export async function getSessionState(src: string) {
         url: string,
         testnet: boolean,
         created: number,
-        updated: number
+        updated: number,
+        revoked: boolean
     };
 }

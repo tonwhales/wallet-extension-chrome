@@ -1,7 +1,8 @@
 export async function readKey(key: string): Promise<string | null> {
     if (typeof global.chrome !== 'undefined') {
+        console.log('Read key: ' + key);
         return new Promise<string | null>((resolve) => {
-            global.chrome.storage.sync.get(key, (i) => {
+            global.chrome.storage.local.get(key, (i) => {
                 if (i[key]) {
                     resolve(i[key]);
                 } else {
@@ -22,9 +23,11 @@ export async function readKey(key: string): Promise<string | null> {
 export async function writeKey(key: string, value: string | null): Promise<void> {
     if (typeof global.chrome !== 'undefined') {
         if (!value) {
-            new Promise<void>((resolve) => chrome.storage.sync.remove(key, () => resolve()));
+            console.log('Clear key: ' + key);
+            new Promise<void>((resolve) => chrome.storage.local.remove(key, () => resolve()));
         } else {
-            new Promise<void>((resolve) => chrome.storage.sync.set({ key: value }, () => resolve()));
+            console.log('Write key: ' + key);
+            new Promise<void>((resolve) => chrome.storage.local.set({ [key]: value }, () => resolve()));
         }
     } else {
         if (value) {

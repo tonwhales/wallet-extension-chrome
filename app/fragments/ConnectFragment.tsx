@@ -62,7 +62,7 @@ const AwaitConnectionComponent = React.memo(() => {
                     await writeAuthState(newState);
                     state.update(newState);
                     return;
-                } else if (fetchedState.state === 'not_found') {
+                } else if (fetchedState.state === 'not_found' || fetchedState.revoked) {
 
                     // Session lost: reset flow
                     await writeAuthState(null);
