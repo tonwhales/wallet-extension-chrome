@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Text, View } from 'react-native';
-import { useAuthState, writeAuthState } from '../model/AuthState';
+import { useAuthState } from '../model/AuthState';
 import { useBalance } from '../model/useBalance';
 import { Avatar } from './components/Avatar';
 import { SimpleButton } from './components/SimpleButton';
