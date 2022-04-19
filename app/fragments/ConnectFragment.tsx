@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Text, View } from 'react-native';
 import QRCode from 'qrcode.react';
-import { IS_TESTNET } from '../../api/client';
-import { ActivityIndicator } from '../../components/ActivityIndicator';
+import { IS_TESTNET } from '../api/client';
+import { ActivityIndicator } from './components/ActivityIndicator';
 import { createNewSession } from '../api/createNewSession';
 import { AuthState, useAuthState, writeAuthState } from '../model/AuthState';
 import { backoff } from '../utils/time';

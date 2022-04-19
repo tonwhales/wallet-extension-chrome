@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { ActivityIndicator } from '../components/ActivityIndicator';
 import { AuthState, AuthStateContext, readAuthState } from './model/AuthState';
 import { backoff } from './utils/time';
 import { App } from './App';
