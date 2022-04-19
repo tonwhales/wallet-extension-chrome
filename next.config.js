@@ -1,4 +1,11 @@
-/** @type {import('next').NextConfig} */
+const withPlugins = require('next-compose-plugins');
+const withTM = require('next-transpile-modules')([
+  '@react-navigation/elements',
+  '@react-navigation/native',
+  '@react-navigation/native-stack',
+  'react-native-safe-area-context'
+]);
+
 const nextConfig = {
   reactStrictMode: true,
   distDir: 'build/next',
@@ -18,4 +25,4 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+module.exports = withPlugins([withTM], nextConfig);

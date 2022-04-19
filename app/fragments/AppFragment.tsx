@@ -1,44 +1,26 @@
 import * as React from 'react';
-import { Text, View } from 'react-native';
-import { useAuthState, writeAuthState } from '../model/AuthState';
-import { useBalance } from '../model/useBalance';
 import { useDetectLogout } from '../model/useDetectLogout';
-import { Avatar } from './components/Avatar';
-import { SimpleButton } from './components/SimpleButton';
-import { ValueComponent } from './components/ValueComponent';
+import { DarkTheme, NavigationContainer, Theme } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { HomeFragment } from './HomeFragment';
+import { IS_TESTNET } from '../api/client';
+
+const Stack = createNativeStackNavigator();
+const theme: Theme = {
+    ...DarkTheme
+}
 
 export const AppFragment = React.memo(() => {
     useDetectLogout();
-    const authState = useAuthState();
-    let sessionState = authState.state!;
-    let wallet = sessionState.reference!;
-    const balance = useBalance(wallet.address);
-    const onReset = React.useCallback(() => {
-        (async () => {
-            await writeAuthState(null);
-            authState.update(null);
-        })();
-    }, []);
-
     return (
-        <View style={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ marginTop: 24, fontSize: 18, color: 'white', alignSelf: 'center', opacity: 0.6 }}>Tonhub for Web</Text>
-            <View style={{ flexGrow: 1 }} />
-            <View style={{ marginHorizontal: 32 }}>
-                <View style={{ alignSelf: 'center', marginBottom: 24 }}>
-                    <Avatar id={wallet.address} size={96} />
-                </View>
-                <Text style={{ height: 24, color: 'white', fontSize: 18, marginVertical: 8, alignSelf: 'center' }}>
-                    {balance && (<ValueComponent value={balance} />)}
-                    {!balance && <Text>...</Text>}
-                </Text>
-                <Text style={{ color: 'white', fontSize: 16, fontFamily: 'monospace' }}>{wallet.address.slice(0, 24)}</Text>
-                <Text style={{ color: 'white', fontSize: 16, fontFamily: 'monospace' }}>{wallet.address.slice(24)}</Text>
-                <View style={{ alignSelf: 'center', marginTop: 64 }}>
-                    <SimpleButton title="Disconnect" onPress={onReset} />
-                </View>
-            </View>
-            <View style={{ flexGrow: 1 }} />
-        </View >
+        <NavigationContainer theme={theme}>
+            <Stack.Navigator>
+                <Stack.Screen
+                    name="Home"
+                    component={HomeFragment}
+                    options={{ title: IS_TESTNET ? 'Ton Dev Web Wallet' : 'Tonhub Web Wallet' }}
+                />
+            </Stack.Navigator>
+        </NavigationContainer>
     );
 });

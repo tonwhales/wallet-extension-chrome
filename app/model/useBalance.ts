@@ -1,8 +1,8 @@
-import { backoff } from '@openland/patterns';
 import * as React from 'react';
 import { delay } from 'teslabot';
-import { Address, fromNano, toNano } from 'ton';
+import { Address } from 'ton';
 import { tonClient } from '../api/client';
+import { backoff } from '../utils/time';
 
 export function useBalance(address: string) {
     let [price, setPrice] = React.useState<string | null>(null);
