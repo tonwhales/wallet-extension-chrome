@@ -19,6 +19,18 @@ export async function readKey(key: string): Promise<string | null> {
     }
 }
 
-export async function writeKey(key: string | null): Promise<void> {
-    // chrome.storage.sync.set({ 'whales-state-key': seed.toString('base64') }, () => console.log('extension logged', seed.toString('base64')));
+export async function writeKey(key: string, value: string | null): Promise<void> {
+    if (typeof global.chrome !== 'undefined') {
+        if (!value) {
+            new Promise<void>((resolve) => chrome.storage.sync.remove(key, () => resolve()));
+        } else {
+            new Promise<void>((resolve) => chrome.storage.sync.set({ key: value }, () => resolve()));
+        }
+    } else {
+        if (value) {
+            localStorage.setItem(key, value);
+        } else {
+            localStorage.removeItem(key);
+        }
+    }
 }

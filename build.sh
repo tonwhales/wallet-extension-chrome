@@ -11,7 +11,6 @@ next build
 next export -o build/export/
 mv build/export/_next build/export/next
 rm build/export/404.html
-rm build/export/404.html.html
 sed -i '' -e "s/\\/_next/\\.\\/next/g" build/export/index.html
 
 # Pack extension

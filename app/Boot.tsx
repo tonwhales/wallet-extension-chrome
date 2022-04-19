@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { ActivityIndicator } from '../components/ActivityIndicator';
-import { AuthState, AuthStateContext } from './model/AuthState';
-import { readKey } from './utils/extensionStorage';
+import { AuthState, AuthStateContext, readAuthState } from './model/AuthState';
 import { backoff } from './utils/time';
 import { App } from './App';
+import { View } from 'react-native';
 
 export const Boot = React.memo((props: { children?: any }) => {
 
@@ -11,12 +11,8 @@ export const Boot = React.memo((props: { children?: any }) => {
     const [authState, setAuthState] = React.useState<undefined | null | AuthState>(undefined);
     React.useEffect(() => {
         backoff(async () => {
-            let state = await readKey('connection-state');
-            if (state) {
-                setAuthState(JSON.parse(state) as AuthState);
-            } else {
-                setAuthState(null);
-            }
+            let state = await readAuthState();
+            setAuthState(state);
         });
     }, []);
     const stateCache = React.useMemo<{ update: (state: AuthState | null) => void, state: AuthState | null }>(() => {
@@ -28,15 +24,15 @@ export const Boot = React.memo((props: { children?: any }) => {
 
     // Render
     return (
-        <>
-            {authState && (
+        <View style={{ width: 350, height: 566 /* Golden Ratio */, backgroundColor: '#222225', alignItems: 'stretch', flexDirection: 'column' }}>
+            {/* {!authState && (
                 <ActivityIndicator />
-            )}
-            {!authState && (
+            )} */}
+            {(authState !== undefined) && (
                 <AuthStateContext.Provider value={stateCache}>
                     <App />
                 </AuthStateContext.Provider>
             )}
-        </>
+        </View>
     );
 });
