@@ -13,7 +13,7 @@ import { toUrlSafe } from '../utils/toUrlSafe';
 import { IS_TESTNET } from '../api/client';
 import { ValueComponent } from '../components/ValueComponent';
 
-type FormData = { address: string, amount: string };
+type FormData = { address: string, amount: number };
 
 const CreateSessionComponent = React.memo(() => {
     let auth = useAuth();
@@ -167,7 +167,7 @@ const WalletComponent = React.memo(() => {
 
     chrome.storage.sync.get('whales-state-key', (v) => { console.log(v['whales-state-key']); seed = v['whales-state-key'] });
 
-    const [form, setForm] = React.useState<FormData>({ address: '', amount: '' })
+    const [form, setForm] = React.useState<FormData>({ address: '', amount: 0 })
 
     const handleFieldChange = React.useCallback((field: keyof FormData) => {
         return (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -272,8 +272,10 @@ const WalletComponent = React.memo(() => {
 
                         let jobD = new Cell();
                         job.refs.push(jobD);
-                        jobD.bits.writeAddress(Address.parse('kQBs7t3uDYae2Ap4686Bl4zGaPKvpbauBnZO_WSop1whaLEs'));
-                        jobD.bits.writeCoins(toNano(1));
+                        // jobD.bits.writeAddress(Address.parse('kQBs7t3uDYae2Ap4686Bl4zGaPKvpbauBnZO_WSop1whaLEs'));
+                        jobD.bits.writeAddress(Address.parse(form.address));
+                        // jobD.bits.writeCoins(toNano(1));
+                        jobD.bits.writeCoins(toNano(form.amount));
                         jobD.bits.writeBit(false); // No hint
 
                         let comment = new Cell();
