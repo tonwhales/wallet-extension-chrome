@@ -63,7 +63,7 @@ input {
 }
 
 .wallet.active::before {
-  content: "copied to clipboard";
+  content: "Copied to clipboard";
   position: absolute;
   padding: 5px 10px;
   font-size: 14px;
