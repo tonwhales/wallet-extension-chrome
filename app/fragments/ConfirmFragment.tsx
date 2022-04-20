@@ -8,6 +8,8 @@ import { useAuthState } from '../model/AuthState';
 import { backoff } from '../utils/time';
 import { SimpleButton } from './components/SimpleButton';
 import { useNavigation } from './components/SimpleNavigation';
+import Lottie from 'lottie-react';
+import { HeaderComponent } from './components/HeaderComponent';
 
 export const ConfirmFragment = React.memo((props: { text: string, target: Address, amount: BN, boc: Cell | null }) => {
     const navigation = useNavigation();
@@ -67,9 +69,20 @@ export const ConfirmFragment = React.memo((props: { text: string, target: Addres
     }, []);
 
     return (
-        <View>
-            <Text style={{ color: 'white' }}>{state}</Text>
-            <SimpleButton title="Back" onPress={navigation.back} />
+        <View style={{ flexGrow: 1, alignItems: 'center' }}>
+            <HeaderComponent text={'Confirmation'} action={navigation.back} />
+            <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: '100px' }}>
+                <div style={{ width: '170px', marginBottom: '15px' }}>
+                    <Lottie
+                        animationData={require('../fragments/components/images/AnimatedSticker.json')}
+                        loop={true}
+                    />
+                </div>
+                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <Text style={{ color: 'white', fontSize: 16, lineHeight: 20 }}>Transaction created!</Text>
+                    <Text style={{ color: 'white', fontSize: 16, lineHeight: 20 }}>Сonfirm it in the Tonhub App</Text>
+                </div>
+            </View>
         </View>
     );
 });

@@ -2,20 +2,23 @@ html,
 body {
   padding: 0;
   margin: 0;
-  font-family: Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,serif;
+  font-family: Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
 }
-h1{
+
+h1 {
   margin: 0;
-  color:#fff;
+  color: #fff;
 }
+
 a {
   color: inherit;
   text-decoration: none;
 }
+
 button {
   display: inline-block;
   border: none;
-  background-color: #1a95e0;
+  background-color: #47A9F1;
   padding: 5px 10px;
   margin: 0;
   cursor: pointer;
@@ -25,31 +28,124 @@ input {
   margin: 0;
   padding: 5px;
   background-color: #222225;
-  border: 1px solid #fff;
+  border: 2px solid #555555 !important;
   color: #fff;
+  transition: border .2s;
 }
-input:focus{
+
+.wallet {
+  cursor: pointer;
+  color: #fff;
+  font-size: 16px;
+  transition: all .2s;
+  position: relative;
+}
+.wallet span {
+ opacity: 0.6;
+}
+.wallet:hover span {
+  opacity: 0.8
+}
+
+.wallet::before {
+  content: "Copied to clipboard";
+  position: absolute;
+  padding: 5px 10px;
+  font-size: 14px;
+  line-height: 17px;
+  top: -30px;
+  color: #fff;
+  background-color: rgb(0, 0, 0, 0.8);
+  border-radius: 8px;
+  opacity: 0;
+  z-index: 5;
+  transition: all .2s;
+}
+
+.wallet.active::before {
+  content: "copied to clipboard";
+  position: absolute;
+  padding: 5px 10px;
+  font-size: 14px;
+  line-height: 17px;
+  top: -30px;
+  color: #fff;
+  background-color: rgb(0, 0, 0, 0.8);
+  border-radius: 8px;
+  opacity: 1;
+}
+
+
+
+.navBtn {
+  background-color: rgba(255, 255, 255, 0.07);
+  transition: all .2s;
+}
+
+.navBtn:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+@keyframes appearance {
+  10% {
+    transform: translateX(-15px);
+  }
+
+  30% {
+    transform: translateX(15px);
+  }
+
+  50% {
+    transform: translateX(-10px);
+  }
+
+  70% {
+    transform: translateX(10px);
+  }
+
+  90% {
+    transform: translateX(-5px);
+  }
+
+  100% {
+    transform: translateX(5px);
+  }
+}
+
+.error {
+  animation: appearance .2s linear;
+}
+
+input:focus {
   outline: none;
+  border: 2px solid #acacac !important;
 }
-input:focus-visible{
+
+input:focus-visible {
   outline: none;
+  border: 2px solid #acacac !important;
 }
+
 @keyframes rotate {
   from {
-      transform: rotate(0deg);
+    transform: rotate(0deg);
   }
+
   to {
-      transform: rotate(360deg);
+    transform: rotate(360deg);
   }
 }
-.activityIndicator{
-      width: 20px;
-     height: 20px;
-     margin: auto;
+
+.activityIndicator {
+  width: 20px;
+  height: 20px;
+  margin: auto;
 }
-.activityIndicator>svg{
+
+.activityIndicator>svg {
   animation: rotate 0.75s linear infinite;
 }
+
 * {
   box-sizing: border-box;
 }
