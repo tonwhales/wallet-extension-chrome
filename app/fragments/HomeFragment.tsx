@@ -16,6 +16,7 @@ export const HomeFragment = React.memo(() => {
     const balance = useBalance(wallet.address);
     const navigation = useNavigation();
     const [label, setLabel] = React.useState(false)
+    const [labelRemover, setLabelRemover] = React.useState(false)
 
     const onSend = React.useCallback(() => {
         navigation.navigate(<SendFragment />);
@@ -43,12 +44,17 @@ export const HomeFragment = React.memo(() => {
                     {!balance.balanceUSD && <Text>...</Text>}
                 </Text>
                 <div className={`wallet ${label ? 'active' : ''}`} style={{ display: 'flex', flexDirection: 'column' }}
+                    data-remover={labelRemover ? 'v' : 'h'}
                     onClick={() => {
                         navigator.clipboard.writeText(wallet.address);
                         setLabel(true);
+                        setLabelRemover(true)
                         setTimeout(() => {
                             setLabel(false)
-                        }, 2000);
+                        }, 1000);
+                        setTimeout(() => {
+                            setLabelRemover(false)
+                        }, 1210);
                     }}>
                     <span>{wallet.address.slice(0, 24)}</span>
                     <span>{wallet.address.slice(24)}</span>
