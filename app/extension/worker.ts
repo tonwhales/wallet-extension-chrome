@@ -5,6 +5,7 @@ import { delay } from "teslabot";
 import { createNewSession } from '../api/createNewSession';
 import { Config } from "../Config";
 import { readInternalState, writeInternalState } from "../model/InternalState";
+import { parseMessage, serializeMessage } from "./proto/Message";
 
 // Public extension state
 let state: ExtensionState = { type: 'initing' };
@@ -64,6 +65,9 @@ backoff(async () => {
                                 address: newState.wallet!.address,
                                 endpoint: newState.wallet!.endpoint,
                                 appPublicKey: newState.wallet!.appPublicKey,
+                                walletConfig: newState.wallet!.walletConfig,
+                                walletType: newState.wallet!.walletType,
+                                walletSig: newState.wallet!.walletSig,
                             }
                         }
                         await writeInternalState(currentIntState);
@@ -79,14 +83,67 @@ backoff(async () => {
     }
 });
 
+async function handleBrowserRequest(name: string, args: any): Promise<any> {
+
+    // Request accounts
+    if (name === 'ton_requestAccounts') {
+        let internalState = await readInternalState();
+        if (internalState && internalState.wallet) {
+            return [internalState.wallet.address];
+        } else {
+            return [];
+        }
+    }
+
+    // Request wallets
+    if (name === 'ton_requestWallets') {
+        let internalState = await readInternalState();
+        if (internalState && internalState.wallet) {
+            return [{
+                address: internalState.wallet.address,
+                walletType: internalState.wallet.walletType,
+                walletConfig: internalState.wallet.walletConfig,
+                walletSig: internalState.wallet.walletSig
+            }];
+        } else {
+            return [];
+        }
+    }
+
+    throw Error('Unknown request: ' + name);
+}
+
 // State listener
 chrome.runtime.onConnect.addListener((port) => {
-    console.warn(port);
     if (port.name === 'state') {
-        port.postMessage({ state });
+
+        // State
+        let connected = true;
+        port.postMessage({ type: 'state', state });
         ports.push(port);
         port.onDisconnect.addListener(() => {
+            connected = false;
             ports = ports.filter((v) => v !== port);
+        });
+
+        // Commands
+        port.onMessage.addListener((msg) => {
+            let src = (msg as any);
+            let name: string = src.name;
+            let opts: any = src.opts;
+            let id: number = src.id;
+            (async () => {
+                try {
+                    let response = await handleBrowserRequest(name, opts);
+                    if (connected) {
+                        port.postMessage({ type: 'response', id, data: response });
+                    }
+                } catch (e) {
+                    if (connected) {
+                        port.postMessage({ type: 'failure', id, text: '' + e });
+                    }
+                }
+            })();
         });
     } else {
         port.disconnect();

@@ -7,6 +7,9 @@ export type InternalState = {
         address: string,
         endpoint: string,
         appPublicKey: string,
+        walletConfig: string,
+        walletType: string,
+        walletSig: string
     } | null;
 };
 
