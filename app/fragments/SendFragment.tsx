@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Text, TextInput, TextStyle, View } from 'react-native';
 import { Address, toNano } from 'ton';
-import { IS_TESTNET } from '../api/client';
 import { HeaderComponent } from './components/HeaderComponent';
 import { SimpleButton } from './components/SimpleButton';
 import { useNavigation } from './components/SimpleNavigation';
@@ -40,7 +39,7 @@ export const SendFragment = React.memo(() => {
 
     return (
         <View style={{ flexGrow: 1, alignItems: 'center', justifyContent: 'space-between' }}>
-            <HeaderComponent text={'Send TON'} action={navigation.back}/>
+            <HeaderComponent text={'Send TON'} action={navigation.back} />
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', flexGrow: 1, gap: '16px', position: 'relative' }}>
                 {error && <div className='error' style={{ backgroundColor: 'rgba(192, 46, 46, 0.8)', borderRadius: '8px', padding: '6px 10px', color: '#fff', fontSize: '14px', lineHeight: '18px', position: 'absolute', top: '40px', left: '15%' }}>
                     {error}
@@ -50,7 +49,7 @@ export const SendFragment = React.memo(() => {
                 <TextInput style={textInputStyle} value={comment} onChangeText={setComment} placeholder="Comment" />
 
                 <View style={{ marginTop: 40, width: '100%', paddingHorizontal: 31 }}>
-                    <SimpleButton title="Confirm" onPress={doSend} disabled={address.length <= 0 || amount.length <= 0} color={IS_TESTNET ? '#F1A03A' : 'rgb(26, 149, 224)'}/>
+                    <SimpleButton title="Confirm" onPress={doSend} disabled={address.length <= 0 || amount.length <= 0} />
                 </View>
             </div>
         </View>

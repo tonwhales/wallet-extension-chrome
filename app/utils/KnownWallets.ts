@@ -1,5 +1,5 @@
 import { Address } from "ton";
-import { IS_TESTNET } from "../api/client";
+import { Config } from "../Config";
 
 const Img_EXMO = require('../fragments/components/images/exmo.png').default.src;
 const Img_Foundation = require('../fragments/components/images/foundation.png').default.src;
@@ -9,9 +9,9 @@ const Img_FTX = require('../fragments/components/images/ftx.png').default.src;
 
 export type KnownWallet = { name: string, ic?: any, colors?: { primary: string, secondary: string } };
 
-export const KnownWallets: { [key: string]: KnownWallet } = IS_TESTNET
+export const KnownWallets: { [key: string]: KnownWallet } = Config.testnet
     ? {
-        [Address.parse('kQBs7t3uDYae2Ap4686Bl4zGaPKvpbauBnZO_WSop1whaLEs').toFriendly({ testOnly: IS_TESTNET })]: {
+        [Address.parse('kQBs7t3uDYae2Ap4686Bl4zGaPKvpbauBnZO_WSop1whaLEs').toFriendly({ testOnly: Config.testnet })]: {
             name: 'Whales Staking Pool',
             colors: {
                 primary: '#65C6FF',

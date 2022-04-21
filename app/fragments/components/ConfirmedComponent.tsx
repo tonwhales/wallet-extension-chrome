@@ -2,7 +2,7 @@ import BN from "bn.js"
 import React from "react"
 import { View, Text } from "react-native"
 import { Address } from "ton"
-import { IS_TESTNET } from "../../api/client"
+import { Config } from "../../Config"
 import { useBalance } from "../../model/useBalance"
 import { KnownAvatar } from "../../utils/KnownAvatar"
 import { KnownWallets } from "../../utils/KnownWallets"
@@ -17,7 +17,7 @@ export const ConfirmedComponent = React.memo((props: { wallet: Address, amount: 
     const balance = useBalance()
     const navigation = useNavigation();
 
-    let known = props.wallet ? KnownWallets[props.wallet.toFriendly({ testOnly: IS_TESTNET })] : undefined;
+    let known = props.wallet ? KnownWallets[props.wallet.toFriendly({ testOnly: Config.testnet })] : undefined;
 
     return (
         <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: '130px' }}>
@@ -33,7 +33,7 @@ export const ConfirmedComponent = React.memo((props: { wallet: Address, amount: 
                     -<ValueComponent value={props.amount.toString(10)} usd={balance.balanceUSD} />
                 </Text>
                 <View style={{ width: 210, marginTop: 120 }}>
-                    <SimpleButton title={'Close'} onPress={() => navigation.navigate(<HomeFragment />)} color={'#333333'} />
+                    <SimpleButton title={'Close'} onPress={() => navigation.navigate(<HomeFragment />)} />
                 </View>
             </div>
         </View>
