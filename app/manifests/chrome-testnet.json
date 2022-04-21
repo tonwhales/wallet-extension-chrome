@@ -1,10 +1,10 @@
 {
-    "name": "Tonhub extension",
-    "description": "Tonhub for Web extension",
-    "version": "0.5.0",
+    "name": "Ton Dev extension",
+    "description": "Ton Dev for Web extension",
+    "version": "0.6.0",
     "manifest_version": 3,
     "action": {
-        "default_title": "Tonhub for Web",
+        "default_title": "Ton Dev for Web",
         "default_popup": "index.html"
     },
     "permissions": [
