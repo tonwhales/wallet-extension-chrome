@@ -16,5 +16,7 @@ sed -i '' -e "s/\\/_next/\\.\\/next/g" build/export/index.html
 # Pack extension
 mkdir -p build/chrome-testnet
 rsync -va build/export/ ./build/chrome-testnet
-cp manifest.json build/chrome-testnet/
-cp manifest.json build/export/
+cp app/manifests/chrome-manifest.json build/chrome-testnet/manifest.json
+cp app/inject.js build/chrome-testnet/
+cp app/worker.js build/chrome-testnet/
+cp app/browser.js build/chrome-testnet/
