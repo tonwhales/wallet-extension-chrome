@@ -28,7 +28,7 @@ cp build/modules-bundled/browser.js build/chrome-testnet/
 # Pack Firefox
 mkdir -p build/firefox-testnet
 rsync -va build/export/ ./build/firefox-testnet
-cp app/manifests/chrome-testnet.json build/firefox-testnet/manifest.json
+cp app/manifests/firefox-testnet.json build/firefox-testnet/manifest.json
 cp build/modules-bundled/inject.js build/firefox-testnet/
 cp build/modules-bundled/worker.js build/firefox-testnet/
 cp build/modules-bundled/browser.js build/firefox-testnet/

@@ -3,7 +3,7 @@
     "description": "Ton Dev for Web extension",
     "version": "0.6.0",
     "manifest_version": 2,
-    "action": {
+    "browser_action": {
         "default_title": "Ton Dev for Web",
         "default_popup": "index.html"
     },
@@ -11,21 +11,10 @@
         "storage"
     ],
     "background": {
-        "service_worker": "worker.js"
+        "scripts": ["worker.js"]
     },
-    "incognito": "split",
-    "web_accessible_resources": [
-        {
-            "resources": [
-                "browser.js"
-            ],
-            "matches": [
-                "file://*/*",
-                "http://*/*",
-                "https://*/*"
-            ]
-        }
-    ],
+    "incognito": "spanning",
+    "web_accessible_resources": [ "browser.js" ],
     "content_scripts": [
         {
             "matches": [
