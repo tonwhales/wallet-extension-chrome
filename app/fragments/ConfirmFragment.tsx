@@ -5,11 +5,10 @@ import { Text, View } from 'react-native';
 import { Address, Cell, CommentMessage } from 'ton';
 import { keyPairFromSeed, sign } from 'ton-crypto';
 import { useAuthState } from '../model/AuthState';
-import { backoff } from '../utils/time';
-import { SimpleButton } from './components/SimpleButton';
 import { useNavigation } from './components/SimpleNavigation';
 import Lottie from 'lottie-react';
 import { HeaderComponent } from './components/HeaderComponent';
+import { backoff } from '../utils/time';
 
 export const ConfirmFragment = React.memo((props: { text: string, target: Address, amount: BN, boc: Cell | null }) => {
     const navigation = useNavigation();

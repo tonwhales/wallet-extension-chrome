@@ -1,5 +1,7 @@
-import axios from "axios";
+
 import { getSecureRandomBytes, keyPairFromSeed } from "ton-crypto";
+import axios from 'axios'
+import fetchAdapter from '@vespaiach/axios-fetch-adapter';
 import { toUrlSafe } from "../utils/toUrlSafe";
 
 export async function createNewSession(testnet: boolean) {
@@ -13,7 +15,7 @@ export async function createNewSession(testnet: boolean) {
         testnet: testnet,
         name: testnet ? 'Ton Dev Web Wallet' : 'Tonhub Web',
         url: testnet ? 'https://test.web.tonhub.com' : 'https://web.tonhub.com'
-    });
+    }, { timeout: 5000, adapter: fetchAdapter });
     if (!session.data.ok) {
         throw Error('Unable to create state');
     }

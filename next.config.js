@@ -1,6 +1,7 @@
 const withPlugins = require('next-compose-plugins');
 const withTM = require('next-transpile-modules')([
-  'react-native-safe-area-context'
+  'react-native-safe-area-context',
+  '@vespaiach/axios-fetch-adapter'
 ]);
 
 const nextConfig = {

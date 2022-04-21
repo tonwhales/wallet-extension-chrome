@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { AuthState, AuthStateContext, readAuthState } from './model/AuthState';
-import { backoff } from './utils/time';
+import { AuthState, AuthStateContext } from './model/AuthState';
 import { App } from './App';
 import { View } from 'react-native';
 
@@ -9,12 +8,17 @@ export const Boot = React.memo((props: { children?: any }) => {
     // State
     const [authState, setAuthState] = React.useState<undefined | null | AuthState>(undefined);
     React.useEffect(() => {
-        backoff(async () => {
-            console.log('Loading auth state');
-            let state = await readAuthState();
-            console.log('Loading auth state: ' + !!state);
-            setAuthState(state);
+        const port = chrome.runtime.connect({ name: 'state' });
+        port.onMessage.addListener((e) => {
+            console.warn(e);
         });
+        console.warn(port);
+        // backoff(async () => {
+        //     console.log('Loading auth state');
+        //     let state = await readAuthState();
+        //     console.log('Loading auth state: ' + !!state);
+        //     setAuthState(state);
+        // });
     }, []);
     const stateCache = React.useMemo<{ update: (state: AuthState | null) => void, state: AuthState | null }>(() => {
         return {

@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { Text, View } from 'react-native';
 import QRCode from 'qrcode.react';
-import { IS_TESTNET } from '../api/client';
 import { ActivityIndicator } from './components/ActivityIndicator';
 import { createNewSession } from '../api/createNewSession';
 import { AuthState, useAuthState, writeAuthState } from '../model/AuthState';
-import { backoff } from '../utils/time';
 import { delay } from 'teslabot';
 import { getSessionState } from '../api/getSessionState';
+import { backoff } from '../utils/time';
+import { Config } from '../Config';
 
 const CreateSessionComponent = React.memo(() => {
     const state = useAuthState();
@@ -15,7 +15,7 @@ const CreateSessionComponent = React.memo(() => {
         backoff(async () => {
 
             // Create session
-            let session = await createNewSession(IS_TESTNET);
+            let session = await createNewSession(Config.testnet);
 
             // Persist session
             let newState: AuthState = { seed: session.seed, session: session.session, reference: null };
@@ -31,7 +31,7 @@ const AwaitConnectionComponent = React.memo(() => {
     const state = useAuthState();
     const session = state.state!.session;
     const seed = state.state!.seed;
-    const link = (IS_TESTNET ? 'ton-test://connect/' : 'ton://connect/') + session + '?endpoint=connect.tonhubapi.com';
+    const link = (Config.testnet ? 'ton-test://connect/' : 'ton://connect/') + session + '?endpoint=connect.tonhubapi.com';
 
     React.useEffect(() => {
         let exited = false;
@@ -82,7 +82,7 @@ const AwaitConnectionComponent = React.memo(() => {
 
     return (
         <View style={{ flexGrow: 1, flexBasis: 0, justifyContent: 'center', alignItems: 'center', alignSelf: 'stretch' }}>
-            <Text style={{ color: 'white', marginVertical: 8, fontSize: 18, marginHorizontal: 16, textAlign: 'center' }}>{IS_TESTNET ? 'Connect Ton Dev Wallet' : 'Connect Tonhub'}</Text>
+            <Text style={{ color: 'white', marginVertical: 8, fontSize: 18, marginHorizontal: 16, textAlign: 'center' }}>{Config.testnet ? 'Connect Ton Dev Wallet' : 'Connect Tonhub'}</Text>
             <Text style={{ color: 'white', marginVertical: 8, fontSize: 16, marginHorizontal: 16, textAlign: 'center' }}>Scan QR code to begin</Text>
             <QRCode
                 size={256}
