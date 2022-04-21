@@ -66,7 +66,7 @@ backoff(async () => {
                                 appPublicKey: newState.wallet!.appPublicKey,
                             }
                         }
-                        await writeInternalState(internalState);
+                        await writeInternalState(currentIntState);
                         state = { type: 'online', session: currentIntState.session, address: newState.wallet!.address };
                         notifyState();
                     }

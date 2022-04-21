@@ -18,6 +18,7 @@ export const Boot = React.memo(() => {
             }
             port = chrome.runtime.connect({ name: 'state' })
             port.onMessage.addListener((e) => {
+                console.log('Received state: ' + JSON.stringify(((e as any).state as ExtensionState)));
                 setExtensionState((e as any).state as ExtensionState);
             });
             port.onDisconnect.addListener(() => {
