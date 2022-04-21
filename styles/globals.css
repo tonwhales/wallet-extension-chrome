@@ -106,8 +106,6 @@ input {
   opacity: 1;
 }
 
-
-
 .navBtn {
   background-color: rgba(255, 255, 255, 0.07);
   transition: all .2s;
@@ -142,7 +140,6 @@ input {
     transform: translateX(5px);
   }
 }
-
 .error {
   animation: appearance .2s linear;
 }
@@ -168,13 +165,14 @@ input:focus-visible {
 }
 
 .activityIndicator {
-  width: 20px;
-  height: 20px;
   margin: auto;
 }
 
 .activityIndicator>svg {
   animation: rotate 0.75s linear infinite;
+}
+.loader>svg {
+  animation: rotate 1s linear infinite;
 }
 
 * {

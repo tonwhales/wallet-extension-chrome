@@ -10,11 +10,24 @@ import { SimpleButton } from './components/SimpleButton';
 import { useNavigation } from './components/SimpleNavigation';
 import Lottie from 'lottie-react';
 import { HeaderComponent } from './components/HeaderComponent';
+import { IS_TESTNET } from '../api/client';
+import { Avatar, avatarColors, avatarImages } from './components/Avatar';
+import murmurhash from 'murmurhash';
+import { KnownWallets } from '../utils/KnownWallets';
+import { KnownAvatar } from '../utils/KnownAvatar';
+import { ValueComponent } from './components/ValueComponent';
+import { useBalance } from '../model/useBalance';
+import { HomeFragment } from './HomeFragment';
+import { SendingComponent } from './components/SendingComponent';
+import { SentComponent } from './components/SentComponent';
+import { PendedComponent } from './components/PendedComponent';
+import { ConfirmedComponent } from './components/ConfirmedComponent';
+import { CanceledComponent } from './components/CanceledComponent';
 
 export const ConfirmFragment = React.memo((props: { text: string, target: Address, amount: BN, boc: Cell | null }) => {
     const navigation = useNavigation();
     const auth = useAuthState();
-    const [state, setState] = React.useState<'sending' | 'sent' | 'confirmed' | 'canceled'>('sending');
+    const [state, setState] = React.useState<'sending' | 'sent' | 'pended' | 'confirmed' | 'canceled'>('sending');
 
     React.useEffect(() => {
 
@@ -64,25 +77,18 @@ export const ConfirmFragment = React.memo((props: { text: string, target: Addres
             });
 
             // Update state
-            setState('sent');
+            setState('confirmed')
         })()
     }, []);
 
     return (
         <View style={{ flexGrow: 1, alignItems: 'center' }}>
-            <HeaderComponent text={'Confirmation'} action={navigation.back} />
-            <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: '100px' }}>
-                <div style={{ width: '170px', marginBottom: '15px' }}>
-                    <Lottie
-                        animationData={require('../fragments/components/images/AnimatedSticker.json')}
-                        loop={true}
-                    />
-                </div>
-                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <Text style={{ color: 'white', fontSize: 16, lineHeight: 20 }}>Transaction created!</Text>
-                    <Text style={{ color: 'white', fontSize: 16, lineHeight: 20 }}>Сonfirm it in the Tonhub App</Text>
-                </div>
-            </View>
+            <HeaderComponent text={state === 'sending' || state === 'sent' || state === 'pended' ? 'Send TON' : state === 'confirmed' ? 'Sent' : state === 'canceled' ? 'Sending canceled' : 'Send TON'} action={navigation.back} />
+            {state === 'sending' && <SendingComponent />}
+            {state === 'sent' && <SentComponent />}
+            {state === 'pended' && <PendedComponent />}
+            {state === 'confirmed' && <ConfirmedComponent wallet={props.target} amount={props.amount} />}
+            {state === 'canceled' && <CanceledComponent />}
         </View>
     );
 });

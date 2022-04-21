@@ -2,7 +2,7 @@ import * as React from 'react';
 import { fromNano } from 'ton';
 import currency from 'currency.js';
 
-export function ValueComponent(props: { value: number | string, precision?: number, noSeparator?: boolean, usd?: number }) {
+export function ValueComponent(props: { value: number | string, precision?: number, noSeparator?: boolean, usd?: number | null }) {
     let precision = props.precision == undefined ? 4 : props.precision
     let formatted = currency(fromNano(props.value), { precision }).format({ symbol: '' });
 

@@ -11,23 +11,37 @@ export interface PriceState {
     }
 }
 
-export function useBalance(address: string) {
+export function useBalance(address?: string) {
     let [price, setPrice] = React.useState<string | null>(null);
     let [priceUSD, setPriceUSD] = React.useState<number | null>(null);
     React.useEffect(() => {
-        let exited = false;
-        backoff(async () => {
-            while (!exited) {
-                let balance = await tonClient.getBalance(Address.parse(address));
-                setPrice(balance.toString(10));
-                // await delay(5000);
-                let response = await (await axios.get('https://connect.tonhubapi.com/price', { method: 'GET' })).data as PriceState
-                setPriceUSD(response.price.usd);
-                await delay(5000);
+        if (address) {
+            let exited = false;
+            backoff(async () => {
+                while (!exited) {
+                    let balance = await tonClient.getBalance(Address.parse(address));
+                    setPrice(balance.toString(10));
+                    // await delay(5000);
+                    let response = await (await axios.get('https://connect.tonhubapi.com/price', { method: 'GET' })).data as PriceState
+                    setPriceUSD(response.price.usd);
+                    await delay(5000);
+                }
+            });
+            return () => {
+                exited = true;
             }
-        });
-        return () => {
-            exited = true;
+        } else{
+            let exited = false;
+            backoff(async () => {
+                while (!exited) {
+                    let response = await (await axios.get('https://connect.tonhubapi.com/price', { method: 'GET' })).data as PriceState
+                    setPriceUSD(response.price.usd);
+                    await delay(5000);
+                }
+            });
+            return () => {
+                exited = true;
+            }
         }
     }, [address]);
     return { balance: price, balanceUSD: priceUSD };

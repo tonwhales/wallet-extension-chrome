@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Text, TextInput, TextStyle, View } from 'react-native';
 import { Address, toNano } from 'ton';
+import { IS_TESTNET } from '../api/client';
 import { HeaderComponent } from './components/HeaderComponent';
 import { SimpleButton } from './components/SimpleButton';
 import { useNavigation } from './components/SimpleNavigation';
@@ -49,7 +50,7 @@ export const SendFragment = React.memo(() => {
                 <TextInput style={textInputStyle} value={comment} onChangeText={setComment} placeholder="Comment" />
 
                 <View style={{ marginTop: 40, width: '100%', paddingHorizontal: 31 }}>
-                    <SimpleButton title="Confirm" onPress={doSend} disabled={address.length <= 0 || amount.length <= 0} />
+                    <SimpleButton title="Confirm" onPress={doSend} disabled={address.length <= 0 || amount.length <= 0} color={IS_TESTNET ? '#F1A03A' : 'rgb(26, 149, 224)'}/>
                 </View>
             </div>
         </View>

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Pressable, Text, View } from 'react-native';
+import { IS_TESTNET } from '../api/client';
 import { useAuthState, writeAuthState } from '../model/AuthState';
 import { useBalance } from '../model/useBalance';
 import { Avatar } from './components/Avatar';
@@ -30,7 +31,7 @@ export const HomeFragment = React.memo(() => {
 
     return (
         <View style={{ flexGrow: 1, alignItems: 'center', justifyContent: 'space-between' }}>
-            <HeaderComponent text={'Tonhub for web'} />
+            <HeaderComponent text={'Tonhub'} />
             <View style={{ marginHorizontal: 32, justifyContent: 'center' }}>
                 <View style={{ alignSelf: 'center', marginBottom: 24 }}>
                     <Avatar id={wallet.address} size={96} />
@@ -60,7 +61,7 @@ export const HomeFragment = React.memo(() => {
                     <span>{wallet.address.slice(24)}</span>
                 </div>
                 <View style={{ marginTop: 40, marginHorizontal: 20 }}>
-                    <SimpleButton title="Send" onPress={onSend} />
+                    <SimpleButton title="Send" onPress={onSend} color={IS_TESTNET ? '#F1A03A' : 'rgb(26, 149, 224)'} />
                 </View>
             </View>
             <View style={{ alignSelf: 'center', marginBottom: 16 }}>
@@ -75,13 +76,12 @@ export const HomeFragment = React.memo(() => {
                         height: 20,
                         borderRadius: 0,
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
                     })}
                 >
                     <Text style={{ color: 'white', fontSize: 18 }} selectable={false}>Disconnect</Text>
                 </Pressable>
             </View>
-            {/* <View style={{ flexGrow: 1 }} /> */}
         </View >
     );
 });
