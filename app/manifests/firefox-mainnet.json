@@ -1,0 +1,37 @@
+{
+    "name": "Tonhub extension",
+    "description": "Tonhub for Web extension",
+    "version": "0.6.0",
+    "manifest_version": 2,
+    "action": {
+        "default_title": "Tonhub for Web",
+        "default_popup": "index.html"
+    },
+    "permissions": [
+        "storage"
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "browser.js"
+            ],
+            "matches": [
+                "file://*/*",
+                "http://*/*",
+                "https://*/*"
+            ]
+        }
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "file://*/*",
+                "http://*/*",
+                "https://*/*"
+            ],
+            "js": [
+                "inject.js"
+            ]
+        }
+    ]
+}

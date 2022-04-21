@@ -6,7 +6,9 @@ const version = JSON.parse(fs.readFileSync(__dirname + '/package.json', 'utf-8')
 // Patch version
 let mainfests = [
     '/app/manifests/chrome-testnet.json',
-    '/app/manifests/chrome-mainnet.json'
+    '/app/manifests/chrome-mainnet.json',
+    '/app/manifests/firefox-testnet.json',
+    '/app/manifests/firefox-mainnet.json'
 ];
 for (let m of mainfests) {
     let body = JSON.parse(fs.readFileSync(__dirname + m));
