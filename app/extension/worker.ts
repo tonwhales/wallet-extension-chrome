@@ -6,6 +6,7 @@ import { createNewSession } from '../api/createNewSession';
 import { Config } from "../Config";
 import { readInternalState, writeInternalState } from "../model/InternalState";
 import { parseMessage, serializeMessage } from "./proto/Message";
+import { getBalance } from "../api/getBalance";
 
 // Public extension state
 let state: ExtensionState = { type: 'initing' };
@@ -107,6 +108,16 @@ async function handleBrowserRequest(name: string, args: any): Promise<any> {
             }];
         } else {
             return [];
+        }
+    }
+
+    // Balance
+    if (name === 'ton_getBalance') {
+        let internalState = await readInternalState();
+        if (internalState && internalState.wallet) {
+            const address = internalState.wallet.address;
+            let balance = await backoff(() => getBalance(address));
+            return balance.toString();
         }
     }
 
