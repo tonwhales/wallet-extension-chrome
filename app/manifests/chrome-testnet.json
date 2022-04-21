@@ -10,6 +10,10 @@
     "permissions": [
         "storage"
     ],
+    "background": {
+        "service_worker": "worker.js"
+    },
+    "incognito": "split",
     "web_accessible_resources": [
         {
             "resources": [

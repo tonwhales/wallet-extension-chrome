@@ -1,15 +1,15 @@
 import * as React from 'react';
 import { Pressable, Text } from 'react-native';
-import { IS_TESTNET } from '../../api/client';
+import { Config } from '../../Config';
 
-export const SimpleButton = React.memo((props: { title: string, onPress: () => void, color: string, disabled?: boolean, secondary?: boolean }) => {
+export const SimpleButton = React.memo((props: { title: string, onPress: () => void, disabled?: boolean, secondary?: boolean }) => {
     return (
         <Pressable
             onPress={props.onPress}
             disabled={props.disabled}
             style={(e) => ({
                 opacity: e.pressed ? 0.6 : 1,
-                backgroundColor: props.disabled ? '#333333' : props.color,
+                backgroundColor: props.disabled ? '#333333' : Config.testnet ? '#F1A03A' : 'rgb(26, 149, 224)',
                 paddingHorizontal: 32,
                 height: 48,
                 borderRadius: 24,

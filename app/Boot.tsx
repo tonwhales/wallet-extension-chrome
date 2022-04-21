@@ -1,27 +1,47 @@
 import * as React from 'react';
-import { AuthState, AuthStateContext, readAuthState } from './model/AuthState';
-import { backoff } from './utils/time';
 import { App } from './App';
 import { View } from 'react-native';
+import { ExtensionState } from './model/ExtensionState';
+import { ExtensionStateContext } from './ExtensionStateContext';
 
-export const Boot = React.memo((props: { children?: any }) => {
+export const Boot = React.memo(() => {
 
     // State
-    const [authState, setAuthState] = React.useState<undefined | null | AuthState>(undefined);
+    const [extensionState, setExtensionState] = React.useState<null | ExtensionState>(null);
     React.useEffect(() => {
-        backoff(async () => {
-            console.log('Loading auth state');
-            let state = await readAuthState();
-            console.log('Loading auth state: ' + !!state);
-            setAuthState(state);
-        });
-    }, []);
-    const stateCache = React.useMemo<{ update: (state: AuthState | null) => void, state: AuthState | null }>(() => {
-        return {
-            update: (e: AuthState | null) => setAuthState(e),
-            state: authState!
+        let exited = false;
+        let port: chrome.runtime.Port | null = null;
+
+        function reconnect() {
+            if (exited) {
+                return;
+            }
+            port = chrome.runtime.connect({ name: 'state' })
+            port.onMessage.addListener((e) => {
+                console.log('Received state: ' + JSON.stringify(((e as any).state as ExtensionState)));
+                setExtensionState((e as any).state as ExtensionState);
+            });
+            port.onDisconnect.addListener(() => {
+                if (exited) {
+                    return;
+                }
+                port = null;
+                setTimeout(() => {
+                    reconnect();
+                }, 1000);
+            })
         }
-    }, [authState]);
+        reconnect();
+
+        return () => {
+            exited = true;
+            if (port) {
+                let p = port!;
+                port = null;
+                p.disconnect();
+            }
+        }
+    }, []);
 
     // Render
     return (
@@ -29,10 +49,10 @@ export const Boot = React.memo((props: { children?: any }) => {
             {/* {!authState && (
                 <ActivityIndicator />
             )} */}
-            {(authState !== undefined) && (
-                <AuthStateContext.Provider value={stateCache}>
+            {!!extensionState && (
+                <ExtensionStateContext.Provider value={extensionState}>
                     <App />
-                </AuthStateContext.Provider>
+                </ExtensionStateContext.Provider>
             )}
         </View>
     );
