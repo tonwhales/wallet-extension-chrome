@@ -46,7 +46,7 @@ export class TonXBrowser extends EventTarget {
         let reqId = this._id++;
         let res = new Promise<any>((resolve, reject) => {
             this._pending.set(reqId, [resolve, reject]);
-        })
+        });
         window.postMessage(serializeMessage({ magic: 'wallet-extension-magic', from: 'browser', pkg: { type: 'request', name, id: reqId, opts: reqOpts } }));
         return res;
     }
