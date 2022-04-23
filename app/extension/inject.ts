@@ -51,6 +51,9 @@ port.onMessage.addListener((e) => {
         }));
     }
 });
+port.onDisconnect.addListener(() => {
+    port = chrome.runtime.connect({ name: 'state' });
+});
 
 // Listener
 window.addEventListener('message', (msg) => {
