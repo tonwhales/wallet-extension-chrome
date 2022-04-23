@@ -89,6 +89,35 @@ backoff(async () => {
     }
 });
 
+async function awaitCompletition(appPublicKey: string, boc: string): Promise<Cell> {
+    let appk = toUrlSafe(appPublicKey);
+    let res = await backoff(async (): Promise<{ type: 'completed', result: Cell } | { type: 'rejected' | 'expired' }> => {
+        while (true) {
+            let res = await axios.get('https://connect.tonhubapi.com/connect/command/' + appk, { adapter: fetchAdapter, timeout: 5000 });
+            if (res.data.job !== boc) {
+                return { type: 'rejected' };
+            }
+            if (res.data.state === 'rejected') {
+                return { type: 'rejected' };
+            }
+            if (res.data.state === 'expired') {
+                return { type: 'expired' };
+            }
+            if (res.data.state === 'completed') {
+                return { type: 'completed', result: Cell.fromBoc(Buffer.from(res.data.result, 'base64'))[0] };
+            }
+            await delay(1000);
+        }
+    });
+    if (res.type === 'completed') {
+        return res.result;
+    }
+    if (res.type === 'expired') {
+        throw Error('Expired');
+    }
+    throw Error('Rejected');
+}
+
 async function handleBrowserRequest(name: string, args: any): Promise<any> {
 
     // Request accounts
@@ -214,7 +243,11 @@ async function handleBrowserRequest(name: string, args: any): Promise<any> {
                 }, { adapter: fetchAdapter, timeout: 5000 });
             });
 
-            return true;
+            // Await completition
+            const cellRes = await awaitCompletition(internalState.wallet.appPublicKey, boc);
+            
+            // Result
+            return cellRes.toBoc({ idx: false }).toString('base64');
         } else {
             throw Error('Wallet not connected');
         }
@@ -281,38 +314,14 @@ async function handleBrowserRequest(name: string, args: any): Promise<any> {
                 }, { adapter: fetchAdapter, timeout: 5000 });
             });
 
-            // Check state
-            const appPublicKey = toUrlSafe(internalState.wallet.appPublicKey);
-            const res = await backoff(async (): Promise<{ type: 'completed', result: Cell } | { type: 'rejected' | 'expired' }> => {
-                while (true) {
-                    let res = await axios.get('https://connect.tonhubapi.com/connect/command/' + appPublicKey, { adapter: fetchAdapter, timeout: 5000 });
-                    if (res.data.job !== boc) {
-                        return { type: 'rejected' };
-                    }
-                    if (res.data.state === 'rejected') {
-                        return { type: 'rejected' };
-                    }
-                    if (res.data.state === 'expired') {
-                        return { type: 'expired' };
-                    }
-                    if (res.data.state === 'completed') {
-                        return { type: 'completed', result: Cell.fromBoc(Buffer.from(res.data.result, 'base64'))[0] };
-                    }
-                    await delay(1000);
-                }
-            });
+            // Await completition
+            const cellRes = await awaitCompletition(internalState.wallet.appPublicKey, boc);
 
             // Process result
-            if (res.type === 'completed') {
-                let slice = res.result.beginParse();
-                const signature = slice.readBuffer(64);
-                // TODO: Check signature ?
-                return signature.toString('base64');
-            }
-            if (res.type === 'expired') {
-                throw Error('Expired');
-            }
-            throw Error('Rejected');
+            // TODO: Check signature ?
+            let slice = cellRes.beginParse();
+            const resSignature = slice.readBuffer(64);
+            return resSignature.toString('base64');
         } else {
             throw Error('Wallet not connected');
         }
