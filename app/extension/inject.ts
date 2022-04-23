@@ -12,7 +12,7 @@ function injectScript(file_path: string, tag: string) {
 injectScript(chrome.runtime.getURL('browser.js'), 'body');
 
 // Subscribe to state
-let port = chrome.runtime.connect({ name: 'state' });
+let port: chrome.runtime.Port;
 let state: ExtensionState = { type: 'initing' };
 function postState() {
     window.postMessage(serializeMessage({
@@ -24,36 +24,41 @@ function postState() {
         }
     }));
 }
-port.onMessage.addListener((e) => {
-    let type = (e as any).type;
-    if (type === 'state') {
-        state = (e as any).state;
-        postState();
-    } else if (type === 'response') {
-        window.postMessage(serializeMessage({
-            magic: 'wallet-extension-magic',
-            from: 'extension',
-            pkg: {
-                type: 'response',
-                id: (e as any).id,
-                data: (e as any).data
-            }
-        }));
-    } else if (type === 'failure') {
-        window.postMessage(serializeMessage({
-            magic: 'wallet-extension-magic',
-            from: 'extension',
-            pkg: {
-                type: 'failed',
-                id: (e as any).id,
-                text: (e as any).text
-            }
-        }));
-    }
-});
-port.onDisconnect.addListener(() => {
+
+function reopenPort() {
     port = chrome.runtime.connect({ name: 'state' });
-});
+    port.onMessage.addListener((e) => {
+        let type = (e as any).type;
+        if (type === 'state') {
+            state = (e as any).state;
+            postState();
+        } else if (type === 'response') {
+            window.postMessage(serializeMessage({
+                magic: 'wallet-extension-magic',
+                from: 'extension',
+                pkg: {
+                    type: 'response',
+                    id: (e as any).id,
+                    data: (e as any).data
+                }
+            }));
+        } else if (type === 'failure') {
+            window.postMessage(serializeMessage({
+                magic: 'wallet-extension-magic',
+                from: 'extension',
+                pkg: {
+                    type: 'failed',
+                    id: (e as any).id,
+                    text: (e as any).text
+                }
+            }));
+        }
+    });
+    port.onDisconnect.addListener(() => {
+        reopenPort();
+    });
+}
+reopenPort();
 
 // Listener
 window.addEventListener('message', (msg) => {
