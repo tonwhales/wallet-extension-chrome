@@ -6,11 +6,12 @@ import { createNewSession } from '../api/createNewSession';
 import { Config } from "../Config";
 import { readInternalState, writeInternalState } from "../model/InternalState";
 import { getBalance } from "../api/getBalance";
-import { Address, Cell, CommentMessage } from "ton";
+import { Address, beginCell, Cell, CommentMessage, safeSign } from "ton";
 import BN from "bn.js";
-import { keyPairFromSeed, sign } from "ton-crypto";
+import { keyPairFromSeed, sha256_sync, sign, signVerify } from "ton-crypto";
 import axios from "axios";
 import fetchAdapter from '@vespaiach/axios-fetch-adapter';
+import { toUrlSafe } from "../utils/toUrlSafe";
 
 // Public extension state
 let state: ExtensionState = { type: 'initing' };
@@ -196,9 +197,8 @@ async function handleBrowserRequest(name: string, args: any): Promise<any> {
             }
 
             // Sign
-            let hash = job.hash();
             let keypair = keyPairFromSeed(Buffer.from(internalState.seed, 'base64'));
-            let signature = sign(hash, keypair.secretKey);
+            let signature = safeSign(job, keypair.secretKey);
 
             // Create package
             let pkg = new Cell();
@@ -215,6 +215,104 @@ async function handleBrowserRequest(name: string, args: any): Promise<any> {
             });
 
             return true;
+        } else {
+            throw Error('Wallet not connected');
+        }
+    }
+
+    // Transaction
+    if (name === 'ton_sign') {
+        const internalState = await readInternalState();
+        if (internalState && internalState.wallet) {
+
+            // Parse data
+            let data: Cell;
+            if (args.dataType === 'hex') {
+                data = new Cell();
+                data.bits.writeBuffer(Buffer.from(args.data, 'hex'));
+            } else if (args.dataType === 'base64') {
+                data = new Cell();
+                data.bits.writeBuffer(Buffer.from(args.data, 'base64'));
+            } else if (args.dataType === 'boc') {
+                data = Cell.fromBoc(Buffer.from(args.data, 'base64'))[0];
+            } else {
+                throw Error('Unknown data type: ' + args.dataType);
+            }
+
+            // Text
+            let text: string;
+            if (typeof args.text !== 'string') {
+                throw Error('Unknown text: ' + args.text);
+            }
+            text = args.text;
+
+            // Send
+            let expires = Math.floor(Date.now() / 1000) + 5 * 60;
+            let job = new Cell();
+            job.bits.writeBuffer(Buffer.from(internalState.wallet.appPublicKey, 'base64'));
+            job.bits.writeUint(expires, 32);
+            job.bits.writeCoins(1);
+            let jobD = new Cell();
+            job.refs.push(jobD);
+
+            // Comment
+            let textCell = new Cell();
+            new CommentMessage(text).writeTo(textCell);
+            jobD.refs.push(textCell);
+
+            // Data
+            jobD.refs.push(data);
+
+            // Sign
+            let keypair = keyPairFromSeed(Buffer.from(internalState.seed, 'base64'));
+            let signature = safeSign(job, keypair.secretKey);
+
+            // Create package
+            let pkg = new Cell();
+            pkg.bits.writeBuffer(signature);
+            pkg.bits.writeBuffer(keypair.publicKey);
+            pkg.refs.push(job);
+            let boc = pkg.toBoc({ idx: false }).toString('base64');
+
+            // Post package
+            await backoff(async () => {
+                await axios.post('https://connect.tonhubapi.com/connect/command', {
+                    job: boc
+                }, { adapter: fetchAdapter, timeout: 5000 });
+            });
+
+            // Check state
+            const appPublicKey = toUrlSafe(internalState.wallet.appPublicKey);
+            const res = await backoff(async (): Promise<{ type: 'completed', result: Cell } | { type: 'rejected' | 'expired' }> => {
+                while (true) {
+                    let res = await axios.get('https://connect.tonhubapi.com/connect/command/' + appPublicKey, { adapter: fetchAdapter, timeout: 5000 });
+                    if (res.data.job !== boc) {
+                        return { type: 'rejected' };
+                    }
+                    if (res.data.state === 'rejected') {
+                        return { type: 'rejected' };
+                    }
+                    if (res.data.state === 'expired') {
+                        return { type: 'expired' };
+                    }
+                    if (res.data.state === 'completed') {
+                        return { type: 'completed', result: Cell.fromBoc(Buffer.from(res.data.result, 'base64'))[0] };
+                    }
+                    await delay(1000);
+                }
+            });
+
+            // Process result
+            if (res.type === 'completed') {
+                let slice = res.result.beginParse();
+                const signature = slice.readBuffer(64);
+                // TODO: Check signature ?
+                return signature.toString('base64');
+            }
+            if (res.type === 'expired') {
+                throw Error('Expired');
+            }
+            throw Error('Rejected');
         } else {
             throw Error('Wallet not connected');
         }
