@@ -1,17 +1,15 @@
 import { backoff } from "../utils/time";
 import { ExtensionState } from "../model/ExtensionState";
-import { getSessionState } from "../api/getSessionState";
 import { delay } from "teslabot";
-import { createNewSession } from '../api/createNewSession';
 import { Config } from "../Config";
 import { readInternalState, writeInternalState } from "../model/InternalState";
 import { getBalance } from "../api/getBalance";
-import { Address, beginCell, Cell, CommentMessage, safeSign } from "ton";
+import { Address, Cell, CommentMessage, safeSign } from "ton";
 import BN from "bn.js";
-import { keyPairFromSeed, sha256_sync, sign, signVerify } from "ton-crypto";
+import { keyPairFromSeed } from "ton-crypto";
 import axios from "axios";
 import fetchAdapter from '@vespaiach/axios-fetch-adapter';
-import { toUrlSafe } from "../utils/toUrlSafe";
+import { TonhubConnector } from 'ton-x';
 
 // Public extension state
 let state: ExtensionState = { type: 'initing' };
@@ -21,6 +19,7 @@ function notifyState() {
         p.postMessage({ state });
     }
 }
+const connector = new TonhubConnector({ testnet: Config.testnet, adapter: fetchAdapter });
 
 // Internal states
 backoff(async () => {
@@ -30,10 +29,13 @@ backoff(async () => {
             // Fetch state
             let internalState = await readInternalState();
             if (!internalState) {
-                let ns = await createNewSession(Config.testnet);
+                let ns = await connector.createNewSession({
+                    name: Config.testnet ? 'Ton Dev Web Wallet' : 'Tonhub Web',
+                    url: Config.testnet ? 'https://test.web.tonhub.com' : 'https://web.tonhub.com'
+                });
                 internalState = {
                     seed: ns.seed,
-                    session: ns.session,
+                    session: ns.id,
                     wallet: null
                 };
                 await writeInternalState(internalState);
@@ -52,10 +54,10 @@ backoff(async () => {
             let currentIntState = internalState;
             await backoff(async () => {
                 while (true) {
-                    let newState = await getSessionState(currentIntState.session);
+                    let newState = await connector.getSessionState(currentIntState.session);
 
                     // Check if canceled
-                    if (newState.state === 'not_found') {
+                    if (newState.state === 'revoked') {
                         state = { type: 'initing' };
                         notifyState();
                         await writeInternalState(null);
@@ -68,16 +70,16 @@ backoff(async () => {
                             seed: currentIntState.seed,
                             session: currentIntState.session,
                             wallet: {
-                                address: newState.wallet!.address,
-                                endpoint: newState.wallet!.endpoint,
-                                appPublicKey: newState.wallet!.appPublicKey,
-                                walletConfig: newState.wallet!.walletConfig,
-                                walletType: newState.wallet!.walletType,
-                                walletSig: newState.wallet!.walletSig,
+                                address: newState.wallet.address,
+                                endpoint: newState.wallet.endpoint,
+                                appPublicKey: newState.wallet.appPublicKey,
+                                walletConfig: newState.wallet.walletConfig,
+                                walletType: newState.wallet.walletType,
+                                walletSig: newState.wallet.walletSig,
                             }
                         }
                         await writeInternalState(currentIntState);
-                        state = { type: 'online', session: currentIntState.session, address: newState.wallet!.address };
+                        state = { type: 'online', session: currentIntState.session, address: newState.wallet.address };
                         notifyState();
                     }
 
@@ -88,35 +90,6 @@ backoff(async () => {
         });
     }
 });
-
-async function awaitCompletition(appPublicKey: string, boc: string): Promise<Cell> {
-    let appk = toUrlSafe(appPublicKey);
-    let res = await backoff(async (): Promise<{ type: 'completed', result: Cell } | { type: 'rejected' | 'expired' }> => {
-        while (true) {
-            let res = await axios.get('https://connect.tonhubapi.com/connect/command/' + appk, { adapter: fetchAdapter, timeout: 5000 });
-            if (res.data.job !== boc) {
-                return { type: 'rejected' };
-            }
-            if (res.data.state === 'rejected') {
-                return { type: 'rejected' };
-            }
-            if (res.data.state === 'expired') {
-                return { type: 'expired' };
-            }
-            if (res.data.state === 'completed') {
-                return { type: 'completed', result: Cell.fromBoc(Buffer.from(res.data.result, 'base64'))[0] };
-            }
-            await delay(1000);
-        }
-    });
-    if (res.type === 'completed') {
-        return res.result;
-    }
-    if (res.type === 'expired') {
-        throw Error('Expired');
-    }
-    throw Error('Rejected');
-}
 
 async function handleBrowserRequest(name: string, args: any): Promise<any> {
 
@@ -183,71 +156,32 @@ async function handleBrowserRequest(name: string, args: any): Promise<any> {
             // StateInit
             let stateInit: Cell | null = null;
             if (typeof args.stateInit === 'string') {
-                data = Cell.fromBoc(Buffer.from(args.stateInit, 'base64'))[0];
+                stateInit = Cell.fromBoc(Buffer.from(args.stateInit, 'base64'))[0];
             }
 
             // Comment
-            let comment: string = '';
+            let comment: string | null = null;
             if (typeof args.comment === 'string') {
                 comment = args.comment;
             }
 
-            // Send
-            let expires = Math.floor(Date.now() / 1000) + 5 * 60;
-            let job = new Cell();
-            job.bits.writeBuffer(Buffer.from(internalState.wallet.appPublicKey, 'base64'));
-            job.bits.writeUint(expires, 32);
-            job.bits.writeCoins(0);
-
-            let jobD = new Cell();
-            job.refs.push(jobD);
-            jobD.bits.writeAddress(address);
-            jobD.bits.writeCoins(value);
-
-            // Comment
-            let commentCell = new Cell();
-            new CommentMessage(comment).writeTo(commentCell);
-            jobD.refs.push(commentCell);
-
-            // Payload
-            if (data) {
-                jobD.bits.writeBit(true);
-                jobD.refs.push(data);
-            } else {
-                jobD.bits.writeBit(false);
-            }
-
-            // StateInit
-            if (stateInit) {
-                jobD.bits.writeBit(true);
-                jobD.refs.push(stateInit);
-            } else {
-                jobD.bits.writeBit(false);
-            }
-
-            // Sign
-            let keypair = keyPairFromSeed(Buffer.from(internalState.seed, 'base64'));
-            let signature = safeSign(job, keypair.secretKey);
-
-            // Create package
-            let pkg = new Cell();
-            pkg.bits.writeBuffer(signature);
-            pkg.bits.writeBuffer(keypair.publicKey);
-            pkg.refs.push(job);
-            let boc = pkg.toBoc({ idx: false }).toString('base64');
-
-            // Post package
-            await backoff(async () => {
-                await axios.post('https://connect.tonhubapi.com/connect/command', {
-                    job: boc
-                }, { adapter: fetchAdapter, timeout: 5000 });
+            // Transact
+            let result = await connector.requestTransaction({
+                seed: internalState.seed,
+                appPublicKey: internalState.wallet.appPublicKey,
+                timeout: 5 * 60 * 1000,
+                to: address.toFriendly({ testOnly: Config.testnet }),
+                value: value.toString(10),
+                text: comment,
+                stateInit: stateInit ? stateInit.toBoc({ idx: false }).toString('base64') : null,
+                payload: data ? data.toBoc({ idx: false }).toString('base64') : null
             });
-
-            // Await completition
-            const cellRes = await awaitCompletition(internalState.wallet.appPublicKey, boc);
-            
-            // Result
-            return cellRes.toBoc({ idx: false }).toString('base64');
+            if (result.type === 'success') {
+                return result.response;
+            } else {
+                // TODO: Better errors?
+                throw Error('Transaction error');
+            }
         } else {
             throw Error('Wallet not connected');
         }
@@ -259,7 +193,7 @@ async function handleBrowserRequest(name: string, args: any): Promise<any> {
         if (internalState && internalState.wallet) {
 
             // Parse data
-            let data: Cell;
+            let data: Cell | null = null;
             if (args.dataType === 'hex') {
                 data = new Cell();
                 data.bits.writeBuffer(Buffer.from(args.data, 'hex'));
@@ -273,55 +207,26 @@ async function handleBrowserRequest(name: string, args: any): Promise<any> {
             }
 
             // Text
-            let text: string;
-            if (typeof args.text !== 'string') {
-                throw Error('Unknown text: ' + args.text);
+            let text: string | null = null;
+            if (typeof args.text === 'string') {
+                text = args.text;
             }
-            text = args.text;
 
-            // Send
-            let expires = Math.floor(Date.now() / 1000) + 5 * 60;
-            let job = new Cell();
-            job.bits.writeBuffer(Buffer.from(internalState.wallet.appPublicKey, 'base64'));
-            job.bits.writeUint(expires, 32);
-            job.bits.writeCoins(1);
-            let jobD = new Cell();
-            job.refs.push(jobD);
-
-            // Comment
-            let textCell = new Cell();
-            new CommentMessage(text).writeTo(textCell);
-            jobD.refs.push(textCell);
-
-            // Data
-            jobD.refs.push(data);
-
-            // Sign
-            let keypair = keyPairFromSeed(Buffer.from(internalState.seed, 'base64'));
-            let signature = safeSign(job, keypair.secretKey);
-
-            // Create package
-            let pkg = new Cell();
-            pkg.bits.writeBuffer(signature);
-            pkg.bits.writeBuffer(keypair.publicKey);
-            pkg.refs.push(job);
-            let boc = pkg.toBoc({ idx: false }).toString('base64');
-
-            // Post package
-            await backoff(async () => {
-                await axios.post('https://connect.tonhubapi.com/connect/command', {
-                    job: boc
-                }, { adapter: fetchAdapter, timeout: 5000 });
+            // Request
+            let result = await connector.requestSign({
+                seed: internalState.seed,
+                appPublicKey: internalState.wallet.appPublicKey,
+                timeout: 5 * 60 * 1000,
+                text,
+                payload: data ? data.toBoc({ idx: false }).toString('base64') : null
             });
 
-            // Await completition
-            const cellRes = await awaitCompletition(internalState.wallet.appPublicKey, boc);
-
-            // Process result
-            // TODO: Check signature ?
-            let slice = cellRes.beginParse();
-            const resSignature = slice.readBuffer(64);
-            return resSignature.toString('base64');
+            if (result.type === 'success') {
+                return result.signature;
+            } else {
+                // TODO: Better errors?
+                throw Error('Transaction error');
+            }
         } else {
             throw Error('Wallet not connected');
         }
