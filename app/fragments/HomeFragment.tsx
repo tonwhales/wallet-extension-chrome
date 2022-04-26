@@ -37,11 +37,11 @@ export const HomeFragment = React.memo(() => {
                 <View style={{ alignSelf: 'center', marginBottom: 24 }}>
                     <Avatar id={state.address} size={96} />
                 </View>
-                <Text style={{ lineHeight: 36, color: 'white', fontSize: 30, fontWeight: '700', marginBottom: 8, marginTop: 16, alignSelf: 'center' }}>
+                <Text style={{ lineHeight: 36, color: 'white', fontSize: 30, fontWeight: '700', marginBottom: 8, marginTop: 16, alignSelf: 'center', textAlign:'center', width:'100%' }}>
                     {balance && balance.balance && (<ValueComponent value={balance.balance} />)}
                     {!balance.balance && <Text>...</Text>}
                 </Text>
-                <Text style={{ lineHeight: 20, fontWeight: '500', color: 'white', fontSize: 16, marginBottom: 20, alignSelf: 'center' }}>
+                <Text style={{ lineHeight: 20, fontWeight: '500', color: 'white', fontSize: 16, marginBottom: 20, alignSelf: 'center', textAlign:'center', width:'100%' }}>
                     {balance && balance.balance && balance.balanceUSD && (<ValueComponent value={balance.balance} usd={balance.balanceUSD} />)}
                     {!balance.balanceUSD && <Text>...</Text>}
                 </Text>
