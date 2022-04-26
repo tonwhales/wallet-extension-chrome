@@ -15,6 +15,9 @@
 		EB1147DB280DC71F0082D80E /* next in Resources */ = {isa = PBXBuildFile; fileRef = EB1147D5280DC71F0082D80E /* next */; };
 		EB1147DC280DC71F0082D80E /* next in Resources */ = {isa = PBXBuildFile; fileRef = EB1147D5280DC71F0082D80E /* next */; };
 		EB1147DD280DC71F0082D80E /* next in Resources */ = {isa = PBXBuildFile; fileRef = EB1147D5280DC71F0082D80E /* next */; };
+		EB2A4A4128183FF500708C0C /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB405D1E280DB1DC0070C49A /* SafariWebExtensionHandler.swift */; };
+		EB2A4A4228183FF500708C0C /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB405D1E280DB1DC0070C49A /* SafariWebExtensionHandler.swift */; };
+		EB2A4A4328183FF600708C0C /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB405D1E280DB1DC0070C49A /* SafariWebExtensionHandler.swift */; };
 		EB405CF3280DB1DA0070C49A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB405CF2280DB1DA0070C49A /* AppDelegate.swift */; };
 		EB405CF6280DB1DA0070C49A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EB405CF4280DB1DA0070C49A /* Main.storyboard */; };
 		EB405CF8280DB1DA0070C49A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB405CF7280DB1DA0070C49A /* ViewController.swift */; };
@@ -40,10 +43,10 @@
 		EB57ED82281823C9003A09EE /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = EB405D25280DB1DC0070C49A /* manifest.json */; };
 		EB57ED83281823CA003A09EE /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = EB405D25280DB1DC0070C49A /* manifest.json */; };
 		EB57ED84281823CA003A09EE /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = EB405D25280DB1DC0070C49A /* manifest.json */; };
-		EBDD0C2928181C71001050A7 /* Clipped.png in Resources */ = {isa = PBXBuildFile; fileRef = EBDD0C2828181C71001050A7 /* Clipped.png */; };
-		EBDD0C2A28181C71001050A7 /* Clipped.png in Resources */ = {isa = PBXBuildFile; fileRef = EBDD0C2828181C71001050A7 /* Clipped.png */; };
-		EBDD0C2B28181C71001050A7 /* Clipped.png in Resources */ = {isa = PBXBuildFile; fileRef = EBDD0C2828181C71001050A7 /* Clipped.png */; };
-		EBDD0C2C28181C71001050A7 /* Clipped.png in Resources */ = {isa = PBXBuildFile; fileRef = EBDD0C2828181C71001050A7 /* Clipped.png */; };
+		EBDD0C2928181C71001050A7 /* dev_128x128_webstore.png in Resources */ = {isa = PBXBuildFile; fileRef = EBDD0C2828181C71001050A7 /* dev_128x128_webstore.png */; };
+		EBDD0C2A28181C71001050A7 /* dev_128x128_webstore.png in Resources */ = {isa = PBXBuildFile; fileRef = EBDD0C2828181C71001050A7 /* dev_128x128_webstore.png */; };
+		EBDD0C2B28181C71001050A7 /* dev_128x128_webstore.png in Resources */ = {isa = PBXBuildFile; fileRef = EBDD0C2828181C71001050A7 /* dev_128x128_webstore.png */; };
+		EBDD0C2C28181C71001050A7 /* dev_128x128_webstore.png in Resources */ = {isa = PBXBuildFile; fileRef = EBDD0C2828181C71001050A7 /* dev_128x128_webstore.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -109,7 +112,7 @@
 		EB55448C281712B600344CE9 /* worker.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = worker.js; sourceTree = "<group>"; };
 		EB554491281712BE00344CE9 /* inject.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = inject.js; sourceTree = "<group>"; };
 		EB554496281712C900344CE9 /* browser.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = browser.js; sourceTree = "<group>"; };
-		EBDD0C2828181C71001050A7 /* Clipped.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Clipped.png; path = "../../../../../../../../../Users/Cartmate/safari-extension/safari-extension Extension/Resources/Clipped.png"; sourceTree = SDKROOT; };
+		EBDD0C2828181C71001050A7 /* dev_128x128_webstore.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = dev_128x128_webstore.png; path = "../../../../../../../../../Users/Cartmate/safari-extension/safari-extension Extension/Resources/dev_128x128_webstore.png"; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -221,7 +224,7 @@
 		EB405D20280DB1DC0070C49A /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				EBDD0C2828181C71001050A7 /* Clipped.png */,
+				EBDD0C2828181C71001050A7 /* dev_128x128_webstore.png */,
 				EB554496281712C900344CE9 /* browser.js */,
 				EB554491281712BE00344CE9 /* inject.js */,
 				EB55448C281712B600344CE9 /* worker.js */,
@@ -366,7 +369,7 @@
 				EB405CF6280DB1DA0070C49A /* Main.storyboard in Resources */,
 				EB1147DA280DC71F0082D80E /* next in Resources */,
 				EB554492281712BE00344CE9 /* inject.js in Resources */,
-				EBDD0C2928181C71001050A7 /* Clipped.png in Resources */,
+				EBDD0C2928181C71001050A7 /* dev_128x128_webstore.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -378,7 +381,7 @@
 				EB57ED83281823CA003A09EE /* manifest.json in Resources */,
 				EB1147D7280DC71F0082D80E /* index.html in Resources */,
 				EB554493281712BE00344CE9 /* inject.js in Resources */,
-				EBDD0C2A28181C71001050A7 /* Clipped.png in Resources */,
+				EBDD0C2A28181C71001050A7 /* dev_128x128_webstore.png in Resources */,
 				EB55448E281712B700344CE9 /* worker.js in Resources */,
 				EB1147DB280DC71F0082D80E /* next in Resources */,
 			);
@@ -392,7 +395,7 @@
 				EB57ED82281823C9003A09EE /* manifest.json in Resources */,
 				EB1147D8280DC71F0082D80E /* index.html in Resources */,
 				EB554494281712BE00344CE9 /* inject.js in Resources */,
-				EBDD0C2B28181C71001050A7 /* Clipped.png in Resources */,
+				EBDD0C2B28181C71001050A7 /* dev_128x128_webstore.png in Resources */,
 				EB55448F281712B700344CE9 /* worker.js in Resources */,
 				EB1147DC280DC71F0082D80E /* next in Resources */,
 			);
@@ -404,7 +407,7 @@
 			files = (
 				EB1147D9280DC71F0082D80E /* index.html in Resources */,
 				EB55449A281712C900344CE9 /* browser.js in Resources */,
-				EBDD0C2C28181C71001050A7 /* Clipped.png in Resources */,
+				EBDD0C2C28181C71001050A7 /* dev_128x128_webstore.png in Resources */,
 				EB1147DD280DC71F0082D80E /* next in Resources */,
 				EB554490281712B700344CE9 /* worker.js in Resources */,
 				EB554495281712BE00344CE9 /* inject.js in Resources */,
@@ -421,6 +424,7 @@
 			files = (
 				EB405CF8280DB1DA0070C49A /* ViewController.swift in Sources */,
 				EB405CF3280DB1DA0070C49A /* AppDelegate.swift in Sources */,
+				EB2A4A4328183FF600708C0C /* SafariWebExtensionHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -429,6 +433,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EB405D05280DB1DC0070C49A /* safari_extensionTests.swift in Sources */,
+				EB2A4A4228183FF500708C0C /* SafariWebExtensionHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -437,6 +442,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EB405D10280DB1DC0070C49A /* safari_extensionUITests.swift in Sources */,
+				EB2A4A4128183FF500708C0C /* SafariWebExtensionHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
