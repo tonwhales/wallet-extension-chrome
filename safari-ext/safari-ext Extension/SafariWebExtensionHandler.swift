@@ -1,8 +1,8 @@
 //
 //  SafariWebExtensionHandler.swift
-//  safari-extension Extension
+//  safari-ext Extension
 //
-//  Created by Cartmate on 18.04.2022.
+//  Created by Cartmate on 26.04.2022.
 //
 
 import SafariServices

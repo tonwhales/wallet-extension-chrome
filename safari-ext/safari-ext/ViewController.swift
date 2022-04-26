@@ -1,16 +1,16 @@
 //
 //  ViewController.swift
-//  safari-extension
+//  safari-ext
 //
-//  Created by Cartmate on 18.04.2022.
+//  Created by Cartmate on 26.04.2022.
 //
 
 import Cocoa
 import SafariServices.SFSafariApplication
 import SafariServices.SFSafariExtensionManager
 
-let appName = "safari-extension"
-let extensionBundleIdentifier = "tonwhales.safari-extension.Extension"
+let appName = "safari-ext"
+let extensionBundleIdentifier = "tonwhales.safari-ext.Extension"
 
 class ViewController: NSViewController {
 

@@ -34,10 +34,10 @@ cp build/modules-bundled/worker.js build/firefox-testnet/
 cp build/modules-bundled/browser.js build/firefox-testnet/
 
 # Pack Safari
-mkdir -p safari-app/safari-extension\ Extension/Resources/
-rsync -va build/export/ ./safari-app/safari-extension\ Extension/Resources/
-cp app/manifests/safari-testnet.json safari-app/safari-extension\ Extension/Resources/manifest.json
-cp build/modules-bundled/inject.js safari-app/safari-extension\ Extension/Resources/
-cp build/modules-bundled/worker.js safari-app/safari-extension\ Extension/Resources/
-cp build/modules-bundled/browser.js safari-app/safari-extension\ Extension/Resources/
-cp assets/dev_128x128_webstore.png safari-app/safari-extension\ Extension/Resources/
+mkdir -p safari-ext/safari-ext\ Extension/Resources/
+rsync -va build/export/ ./safari-ext/safari-ext\ Extension/Resources/
+cp app/manifests/safari-testnet.json safari-ext/safari-ext\ Extension/Resources/manifest.json
+cp build/modules-bundled/inject.js safari-ext/safari-ext\ Extension/Resources/
+cp build/modules-bundled/worker.js safari-ext/safari-ext\ Extension/Resources/
+cp build/modules-bundled/browser.js safari-ext/safari-ext\ Extension/Resources/
+cp assets/dev_128x128_webstore.png safari-ext/safari-ext\ Extension/Resources/

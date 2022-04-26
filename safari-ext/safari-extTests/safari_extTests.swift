@@ -1,14 +1,14 @@
 //
-//  safari_extensionTests.swift
-//  safari-extensionTests
+//  safari_extTests.swift
+//  safari-extTests
 //
-//  Created by Cartmate on 18.04.2022.
+//  Created by Cartmate on 26.04.2022.
 //
 
 import XCTest
-@testable import safari_extension
+@testable import safari_ext
 
-class safari_extensionTests: XCTestCase {
+class safari_extTests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.

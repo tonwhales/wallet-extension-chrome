@@ -14,8 +14,8 @@
 
 # production
 /build
-/safari-app/safari-extension\ Extension/Resources
-/safari-app/safari-extension.xcodeproj/project.xcworkspace
+/safari-ext/safari-ext\ Extension/Resources
+/safari-ext/safari-ext.xcodeproj/project.xcworkspace
 
 # misc
 .DS_Store

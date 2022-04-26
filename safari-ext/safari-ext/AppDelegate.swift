@@ -1,8 +1,8 @@
 //
 //  AppDelegate.swift
-//  safari-extension
+//  safari-ext
 //
-//  Created by Cartmate on 18.04.2022.
+//  Created by Cartmate on 26.04.2022.
 //
 
 import Cocoa

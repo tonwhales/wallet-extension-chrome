@@ -1,13 +1,13 @@
 //
-//  safari_extensionUITests.swift
-//  safari-extensionUITests
+//  safari_extUITests.swift
+//  safari-extUITests
 //
-//  Created by Cartmate on 18.04.2022.
+//  Created by Cartmate on 26.04.2022.
 //
 
 import XCTest
 
-class safari_extensionUITests: XCTestCase {
+class safari_extUITests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
