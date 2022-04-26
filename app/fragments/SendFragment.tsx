@@ -14,7 +14,8 @@ const textInputStyle: TextStyle = {
     borderRadius: 10,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: ' #181818'
+    backgroundColor: ' #181818',
+    marginBottom: 16
 };
 
 export const SendFragment = React.memo(() => {
@@ -40,7 +41,7 @@ export const SendFragment = React.memo(() => {
     return (
         <View style={{ flexGrow: 1, alignItems: 'center', justifyContent: 'space-between' }}>
             <HeaderComponent text={'Send TON'} action={navigation.back} />
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', flexGrow: 1, gap: '16px', position: 'relative' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', flexGrow: 1, position: 'relative' }}>
                 {error && <div className='error' style={{ backgroundColor: 'rgba(192, 46, 46, 0.8)', borderRadius: '8px', padding: '6px 10px', color: '#fff', fontSize: '14px', lineHeight: '18px', position: 'absolute', top: '40px', left: '15%' }}>
                     {error}
                 </div>}
